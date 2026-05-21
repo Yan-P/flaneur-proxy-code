@@ -7,6 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 const GOOGLE_KEY = process.env.GOOGLE_API_KEY;
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 app.get('/directions', async (req, res) => {
   try {
@@ -14,6 +15,39 @@ app.get('/directions', async (req, res) => {
     const response = await axios.get(
       'https://maps.googleapis.com/maps/api/directions/json',
       { params: { origin, destination, mode, key: GOOGLE_KEY, region: 'au' } }
+    );
+    res.json(response.data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/advice', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    const response = await axios.post(
+      'https://api.anthropic.com/v1/messages',
+      {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are Flâneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
+
+Return ONLY this JSON, no markdown, no preamble:
+{
+  "routes": [
+    {
+      "title": "short descriptive title",
+      "recommended": true or false,
+      "duration": "X min",
+      "cost": "free or ~$X",
+      "legs": [{"icon": "ti-walk or ti-bus or ti-train or ti-car or ti-tram", "label": "short leg description"}],
+      "flaneur_take": "1-2 sentences of honest trade-off reasoning specific to this journey"
+    }
+  ]
+}`,
+        messages: [{ role: 'user', content: prompt }]
+      },
+      { headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } }
     );
     res.json(response.data);
   } catch (e) {
