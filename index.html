@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flâneur — the route a smart local would take</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f7f4ef;
+      --surface:   #ffffff;
+      --border:    #e2ddd6;
+      --text:      #1c1a17;
+      --muted:     #7a7368;
+      --accent:    #c96a35;
+      --accent-lt: #f5e8de;
+      --green:     #3a7d5a;
+      --green-lt:  #dff0e8;
+      --radius:    14px;
+      --shadow:    0 2px 16px rgba(0,0,0,.07);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 56px 24px 40px;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    header p {
+      margin-top: 8px;
+      font-size: .92rem;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    /* ── Card wrapper ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Form ── */
+    .form-wrap {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .form-card {
+      padding: 32px 28px 28px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 14px;
+      transition: border-color .2s;
+    }
+    .input-row:focus-within {
+      border-color: var(--accent);
+    }
+    .input-row .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-from { background: var(--accent); }
+    .dot-to   { background: var(--text); }
+    .input-row input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 14px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: .95rem;
+      color: var(--text);
+      outline: none;
+    }
+    .input-row input::placeholder { color: #b0a99e; }
+
+    /* connector line */
+    .input-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin-left: 2px;
+      height: 12px;
+    }
+    .connector-line {
+      width: 1.5px;
+      flex: 1;
+      background: var(--border);
+      margin: 0 auto;
+    }
+
+    /* ── Preferences ── */
+    .prefs-label {
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .prefs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .pref-btn {
+      padding: 8px 15px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: .83rem;
+      font-weight: 400;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .18s ease;
+      user-select: none;
+    }
+    .pref-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .pref-btn.active {
+      background: var(--accent-lt);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      background: var(--text);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: .95rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: background .2s, transform .1s;
+      position: relative;
+    }
+    .submit-btn:hover { background: #2d2a25; }
+    .submit-btn:active { transform: scale(.99); }
+    .submit-btn:disabled { background: #b0a99e; cursor: not-allowed; transform: none; }
+
+    /* ── Loading state ── */
+    .loading-wrap {
+      max-width: 560px;
+      margin: 32px auto 0;
+      padding: 0 20px;
+      display: none;
+    }
+    .loading-wrap.visible { display: block; }
+    .loading-card {
+      padding: 28px;
+      text-align: center;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-steps {
+      list-style: none;
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 2;
+    }
+    .loading-steps li.done { color: var(--green); }
+    .loading-steps li.done::before { content: '✓ '; }
+    .loading-steps li.active { color: var(--text); font-weight: 500; }
+    .loading-steps li.active::before { content: '→ '; }
+
+    /* ── Error state ── */
+    .error-banner {
+      max-width: 560px;
+      margin: 20px auto 0;
+      padding: 0 20px;
+      display: none;
+    }
+    .error-banner.visible { display: block; }
+    .error-inner {
+      background: #fff0ed;
+      border: 1px solid #f5c5b8;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: .88rem;
+      color: #b04020;
+    }
+
+    /* ── Results ── */
+    .results-wrap {
+      max-width: 560px;
+      margin: 32px auto 0;
+      padding: 0 20px;
+      display: none;
+    }
+    .results-wrap.visible { display: flex; flex-direction: column; gap: 16px; }
+
+    .results-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .results-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+    }
+    .results-header span {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    /* ── Route card ── */
+    .route-card {
+      padding: 22px 22px 20px;
+      position: relative;
+      transition: box-shadow .2s;
+    }
+    .route-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.1); }
+
+    .route-card.recommended {
+      border-color: var(--green);
+      background: linear-gradient(135deg, #ffffff 0%, #f4fbf7 100%);
+    }
+
+    .rec-badge {
+      display: none;
+      position: absolute;
+      top: -1px; right: 18px;
+      background: var(--green);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 0 0 8px 8px;
+    }
+    .route-card.recommended .rec-badge { display: block; }
+
+    .route-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .route-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .route-meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .route-duration {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .route-cost {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .route-legs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .leg-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: .78rem;
+      color: var(--text);
+    }
+    .leg-pill .leg-icon { font-size: .85rem; }
+
+    .route-highlight {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+    .route-card:not(.recommended) .route-highlight {
+      color: var(--muted);
+    }
+
+    .flaneur-take {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: .9rem;
+      line-height: 1.6;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .flaneur-take::before {
+      content: '"';
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .flaneur-take::after {
+      content: '"';
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      font-size: .75rem;
+      color: #c0b8ae;
+      letter-spacing: .04em;
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 36px 20px 28px; }
+      .form-card { padding: 24px 20px 20px; }
+      .route-card { padding: 18px 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>flâneur</h1>
+  <p>the route a smart local would take</p>
+</header>
+
+<main>
+  <div class="form-wrap">
+    <div class="form-card card">
+
+      <div class="input-group">
+        <div class="input-row">
+          <span class="dot dot-from"></span>
+          <input id="origin" type="text" placeholder="From — a street, landmark, or neighbourhood" autocomplete="off" />
+        </div>
+        <div class="input-row">
+          <span class="dot dot-to"></span>
+          <input id="destination" type="text" placeholder="To — where are you headed?" autocomplete="off" />
+        </div>
+      </div>
+
+      <p class="prefs-label">Your vibe</p>
+      <div class="prefs">
+        <button class="pref-btn" data-pref="walk">🚶 walk a bit</button>
+        <button class="pref-btn" data-pref="scenic">🌿 take the scenic option</button>
+        <button class="pref-btn" data-pref="speed">⚡ prioritise speed</button>
+        <button class="pref-btn" data-pref="cheap">💸 keep it cheap</button>
+      </div>
+
+      <button class="submit-btn" id="findBtn">Find my route</button>
+
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="loading-card card">
+      <div class="spinner"></div>
+      <ul class="loading-steps" id="loadingSteps">
+        <li id="step-dirs">Fetching route options</li>
+        <li id="step-advice">Consulting the local</li>
+        <li id="step-render">Preparing your routes</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-banner" id="errorBanner">
+    <div class="error-inner" id="errorText"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-wrap" id="resultsWrap">
+    <div class="results-header">
+      <h2>Your routes</h2>
+      <span id="routeSubhead"></span>
+    </div>
+    <div id="routeCards"></div>
+  </div>
+</main>
+
+<footer>
+  flâneur &nbsp;·&nbsp; move like you belong
+</footer>
+
+<script>
+  const PROXY = 'https://flaneur-proxy.onrender.com';
+
+  /* ── Preference toggles ── */
+  document.querySelectorAll('.pref-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('active'));
+  });
+
+  /* ── Helpers ── */
+  function activePrefs() {
+    return [...document.querySelectorAll('.pref-btn.active')].map(b => b.textContent.trim());
+  }
+
+  function setStep(id, state) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = state; // 'active' | 'done'
+  }
+
+  function modeIcon(mode) {
+    const m = (mode || '').toLowerCase();
+    if (m === 'walking' || m === 'walk')   return '🚶';
+    if (m === 'transit' || m === 'subway' || m === 'metro' || m === 'bus') return '🚇';
+    if (m === 'driving' || m === 'taxi' || m === 'car') return '🚕';
+    if (m === 'cycling' || m === 'bicycle') return '🚴';
+    if (m === 'tram' || m === 'rail') return '🚊';
+    if (m === 'ferry') return '⛴️';
+    return '🗺️';
+  }
+
+  function parseDuration(leg) {
+    return leg?.duration?.text || '—';
+  }
+
+  function parseSteps(route) {
+    const steps = route?.routes?.[0]?.legs?.[0]?.steps || [];
+    return steps.map(s => {
+      const mode = s.travel_mode?.toLowerCase() || 'walk';
+      let label = s.html_instructions?.replace(/<[^>]+>/g, '') || '';
+      if (s.transit_details) {
+        const td = s.transit_details;
+        const line = td.line?.short_name || td.line?.name || '';
+        const departure = td.departure_stop?.name || '';
+        const arrival   = td.arrival_stop?.name   || '';
+        label = `${line ? line + ' · ' : ''}${departure} → ${arrival}`;
+      }
+      return { mode, label: label.slice(0, 60) };
+    });
+  }
+
+  function routeSummaryText(transit, walking, driving, origin, dest, prefs) {
+    const fmt = (r) => {
+      if (!r?.routes?.length) return 'Not available';
+      const leg = r.routes[0].legs[0];
+      const dur = leg?.duration?.text || '?';
+      const dist = leg?.distance?.text || '?';
+      const fare = r.routes[0]?.fare ? `fare ~${r.routes[0].fare.currency}${r.routes[0].fare.value}` : '';
+      const steps = (leg?.steps || []).slice(0, 5).map(s => {
+        if (s.transit_details) {
+          const td = s.transit_details;
+          return `[transit: ${td.line?.short_name || td.line?.name || 'line'}, ${td.departure_stop?.name || ''} → ${td.arrival_stop?.name || ''}]`;
+        }
+        return `[${(s.travel_mode||'walk').toLowerCase()}: ${(s.html_instructions||'').replace(/<[^>]+>/g,'').slice(0,40)}]`;
+      }).join(', ');
+      return `${dur}, ${dist}${fare ? ', ' + fare : ''}. Steps: ${steps}`;
+    };
+
+    const prefsText = prefs.length ? `User preferences: ${prefs.join(', ')}.` : 'No specific preferences.';
+
+    return `You are a witty, knowledgeable local guide. A traveller wants to get from "${origin}" to "${dest}".
+
+Here are the Google Maps route options:
+
+TRANSIT: ${fmt(transit)}
+WALKING: ${fmt(walking)}
+DRIVING/TAXI: ${fmt(driving)}
+
+${prefsText}
+
+Based on the above, recommend exactly 2 or 3 routes. At least one should reflect the user's preferences. Mark exactly one as recommended:true (the best overall choice given their preferences).
+
+Return ONLY a valid JSON array — no markdown, no commentary — with this structure for each route:
+[
+  {
+    "title": "Short evocative name (4-6 words)",
+    "duration": "e.g. 22 mins",
+    "cost": "e.g. ~£2.50 or Free or ~€12 taxi",
+    "legs": [
+      { "mode": "walk|transit|taxi|cycling", "label": "Short description, e.g. Bakerloo to Oxford Circus" }
+    ],
+    "highlight": "One punchy sentence: why this route works",
+    "flaneurTake": "2-3 sentences of opinionated, local-flavoured advice. Mention something specific about the journey.",
+    "recommended": true
+  }
+]`;
+  }
+
+  /* ── Fetch helpers ── */
+  async function fetchDirections(origin, dest, mode) {
+    const url = `${PROXY}/directions?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&mode=${mode}`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    return r.json().catch(() => null);
+  }
+
+  async function fetchAdvice(prompt) {
+    const r = await fetch(`${PROXY}/advice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!r.ok) throw new Error(`Advice endpoint returned ${r.status}`);
+    return r.json();
+  }
+
+  /* ── Render cards ── */
+  function renderCards(routes, origin, dest) {
+    const wrap = document.getElementById('routeCards');
+    document.getElementById('routeSubhead').textContent = `${origin} → ${dest}`;
+    wrap.innerHTML = '';
+
+    routes.forEach(route => {
+      const card = document.createElement('div');
+      card.className = 'route-card card' + (route.recommended ? ' recommended' : '');
+
+      const legs = (route.legs || []).map(l =>
+        `<span class="leg-pill"><span class="leg-icon">${modeIcon(l.mode)}</span>${l.label}</span>`
+      ).join('');
+
+      card.innerHTML = `
+        <span class="rec-badge">Recommended</span>
+        <div class="route-top">
+          <div class="route-title">${route.title || 'Route'}</div>
+          <div class="route-meta">
+            <div class="route-duration">${route.duration || '—'}</div>
+            <div class="route-cost">${route.cost || ''}</div>
+          </div>
+        </div>
+        <div class="route-legs">${legs}</div>
+        ${route.highlight ? `<div class="route-highlight">${route.highlight}</div>` : ''}
+        <div class="flaneur-take">${route.flaneurTake || ''}</div>
+      `;
+
+      // recommended card goes first
+      if (route.recommended) {
+        wrap.prepend(card);
+      } else {
+        wrap.appendChild(card);
+      }
+    });
+  }
+
+  /* ── Main submit handler ── */
+  document.getElementById('findBtn').addEventListener('click', async () => {
+    const origin = document.getElementById('origin').value.trim();
+    const dest   = document.getElementById('destination').value.trim();
+
+    if (!origin || !dest) {
+      document.getElementById('origin').focus();
+      return;
+    }
+
+    const btn = document.getElementById('findBtn');
+    btn.disabled = true;
+    btn.textContent = 'Finding your route…';
+
+    const loading = document.getElementById('loadingWrap');
+    const error   = document.getElementById('errorBanner');
+    const results = document.getElementById('resultsWrap');
+
+    loading.classList.add('visible');
+    error.classList.remove('visible');
+    results.classList.remove('visible');
+
+    setStep('step-dirs', 'active');
+    setStep('step-advice', '');
+    setStep('step-render', '');
+
+    try {
+      /* 1. Fetch all three directions in parallel */
+      const [transit, walking, driving] = await Promise.all([
+        fetchDirections(origin, dest, 'transit'),
+        fetchDirections(origin, dest, 'walking'),
+        fetchDirections(origin, dest, 'driving')
+      ]);
+
+      if (!transit && !walking && !driving) {
+        throw new Error('No route data returned. Check your locations and try again.');
+      }
+
+      setStep('step-dirs', 'done');
+      setStep('step-advice', 'active');
+
+      /* 2. Build prompt and call advice endpoint */
+      const prefs = activePrefs();
+      const prompt = routeSummaryText(transit, walking, driving, origin, dest, prefs);
+
+      const adviceRaw = await fetchAdvice(prompt);
+
+      setStep('step-advice', 'done');
+      setStep('step-render', 'active');
+
+      /* 3. Parse Claude's JSON response */
+      let routes = [];
+      try {
+        // Claude might return {content: [{text: "..."}]} (Anthropic API format)
+        let text = '';
+        if (typeof adviceRaw === 'string') {
+          text = adviceRaw;
+        } else if (adviceRaw?.content?.[0]?.text) {
+          text = adviceRaw.content[0].text;
+        } else if (adviceRaw?.completion) {
+          text = adviceRaw.completion;
+        } else if (Array.isArray(adviceRaw)) {
+          routes = adviceRaw;
+        } else {
+          text = JSON.stringify(adviceRaw);
+        }
+
+        if (!routes.length && text) {
+          // Strip potential markdown code fences
+          const cleaned = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+          // Find JSON array
+          const match = cleaned.match(/\[[\s\S]*\]/);
+          if (match) {
+            routes = JSON.parse(match[0]);
+          } else {
+            routes = JSON.parse(cleaned);
+          }
+        }
+      } catch (parseErr) {
+        console.error('Parse error:', parseErr, adviceRaw);
+        // Fallback: synthesise basic cards from raw direction data
+        routes = buildFallbackRoutes(transit, walking, driving);
+      }
+
+      if (!routes.length) {
+        routes = buildFallbackRoutes(transit, walking, driving);
+      }
+
+      setStep('step-render', 'done');
+
+      loading.classList.remove('visible');
+      renderCards(routes, origin, dest);
+      results.classList.add('visible');
+
+    } catch (err) {
+      console.error(err);
+      loading.classList.remove('visible');
+      document.getElementById('errorText').textContent = err.message || 'Something went wrong. Please try again.';
+      error.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find my route';
+    }
+  });
+
+  /* ── Fallback route builder (if Claude parsing fails) ── */
+  function buildFallbackRoutes(transit, walking, driving) {
+    const routes = [];
+
+    if (transit?.routes?.length) {
+      const leg = transit.routes[0].legs[0];
+      const steps = parseSteps(transit);
+      routes.push({
+        title: 'The Public Route',
+        duration: leg?.duration?.text || '—',
+        cost: transit.routes[0]?.fare
+          ? `~${transit.routes[0].fare.currency}${transit.routes[0].fare.value}`
+          : 'Transit fare',
+        legs: steps.slice(0, 4),
+        highlight: 'The classic way to move through the city.',
+        flaneurTake: 'Sit back, watch the city through the window, and arrive without the stress of navigation.',
+        recommended: true
+      });
+    }
+
+    if (walking?.routes?.length) {
+      const leg = walking.routes[0].legs[0];
+      routes.push({
+        title: 'On Foot',
+        duration: leg?.duration?.text || '—',
+        cost: 'Free',
+        legs: [{ mode: 'walk', label: `Walk ${leg?.distance?.text || ''}` }],
+        highlight: 'The most honest way to know a city.',
+        flaneurTake: 'Every street is a new chapter. Take the walk — you\'ll notice things you\'d never see from a window.',
+        recommended: false
+      });
+    }
+
+    if (driving?.routes?.length) {
+      const leg = driving.routes[0].legs[0];
+      routes.push({
+        title: 'Taxi Direct',
+        duration: leg?.duration?.text || '—',
+        cost: 'Taxi fare',
+        legs: [{ mode: 'taxi', label: `Drive ${leg?.distance?.text || ''}` }],
+        highlight: 'Door to door, no fuss.',
+        flaneurTake: 'When you need to arrive fresh and on time. Leave the navigation to someone else.',
+        recommended: false
+      });
+    }
+
+    if (!routes.length) {
+      routes.push({
+        title: 'Route Found',
+        duration: '—',
+        cost: '—',
+        legs: [],
+        highlight: 'Check the details above.',
+        flaneurTake: 'We found your journey — details are being worked out.',
+        recommended: true
+      });
+    }
+
+    return routes;
+  }
+
+  /* Allow Enter key to submit */
+  ['origin', 'destination'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('findBtn').click();
+    });
+  });
+</script>
+</body>
+</html>
