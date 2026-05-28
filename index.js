@@ -29,16 +29,16 @@ app.post('/advice', async (req, res) => {
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
         system: `You are Flâneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
 
-Return ONLY this JSON, no markdown, no preamble:
+Return ONLY valid JSON, no markdown, no preamble:
 {
   "routes": [
     {
       "title": "short descriptive title",
-      "recommended": true or false,
+      "recommended": true,
       "duration": "X min",
       "cost": "free or ~$X",
       "legs": [{"icon": "ti-walk or ti-bus or ti-train or ti-car or ti-tram", "label": "short leg description"}],
@@ -48,11 +48,21 @@ Return ONLY this JSON, no markdown, no preamble:
 }`,
         messages: [{ role: 'user', content: prompt }]
       },
-      { headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } }
+      {
+        headers: {
+          'x-api-key': ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        }
+      }
     );
     res.json(response.data);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    // Forward the actual Anthropic error so the client can see it
+    const status  = e.response?.status  || 500;
+    const message = e.response?.data?.error?.message || e.message;
+    console.error('Advice error:', status, message);
+    res.status(status).json({ error: message });
   }
 });
 
