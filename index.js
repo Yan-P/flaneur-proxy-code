@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -56,6 +57,9 @@ Return ONLY this JSON, no markdown, no preamble:
 });
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Serve frontend
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Flâneur proxy running on port ${PORT}`));
