@@ -35,21 +35,20 @@
     /* ── Header ── */
     header {
       text-align: center;
-      padding: 56px 24px 40px;
+      padding: 52px 24px 36px;
     }
     header h1 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(2.6rem, 7vw, 4.2rem);
       font-weight: 400;
       letter-spacing: -0.01em;
-      color: var(--text);
     }
     header p {
       margin-top: 8px;
-      font-size: .88rem;
+      font-size: .85rem;
       font-weight: 300;
       color: var(--muted);
-      letter-spacing: .09em;
+      letter-spacing: .1em;
       text-transform: uppercase;
     }
 
@@ -62,19 +61,14 @@
     }
 
     /* ── Form ── */
-    .form-wrap {
-      max-width: 560px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    .form-card { padding: 32px 28px 28px; }
+    .form-wrap { max-width: 560px; margin: 0 auto; padding: 0 20px; }
+    .form-card  { padding: 30px 26px 26px; }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
+    .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+
+    /* autocomplete wrapper */
+    .ac-wrap { position: relative; }
+
     .input-row {
       display: flex;
       align-items: center;
@@ -101,21 +95,41 @@
     }
     .input-row input::placeholder { color: #b5afa8; }
 
+    /* ── Autocomplete dropdown ── */
+    .ac-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+    }
+    .ac-dropdown.open { display: block; }
+    .ac-item {
+      padding: 11px 14px;
+      font-size: .88rem;
+      cursor: pointer;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      line-height: 1.35;
+      transition: background .12s;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover, .ac-item.highlighted { background: var(--accent-lt); }
+    .ac-item .ac-main { font-weight: 500; }
+    .ac-item .ac-sub  { font-size: .78rem; color: var(--muted); margin-top: 1px; }
+
     /* ── Preferences ── */
     .prefs-label {
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .09em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .09em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
     }
-    .prefs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 26px;
-    }
+    .prefs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
     .pref-btn {
       padding: 8px 14px;
       border-radius: 999px;
@@ -158,7 +172,7 @@
     /* ── Loading ── */
     .loading-wrap { max-width: 560px; margin: 28px auto 0; padding: 0 20px; display: none; }
     .loading-wrap.visible { display: block; }
-    .loading-card { padding: 28px 24px; }
+    .loading-card { padding: 28px 24px; text-align: center; }
     .spinner {
       width: 34px; height: 34px;
       border: 2.5px solid var(--border);
@@ -168,7 +182,7 @@
       margin: 0 auto 18px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-steps { list-style: none; font-size: .84rem; color: var(--muted); line-height: 2.1; text-align: center; }
+    .loading-steps { list-style: none; font-size: .84rem; color: var(--muted); line-height: 2.1; }
     .loading-steps li.done   { color: var(--green); }
     .loading-steps li.done::before   { content: '✓  '; }
     .loading-steps li.active { color: var(--text); font-weight: 500; }
@@ -178,75 +192,60 @@
     .error-banner { max-width: 560px; margin: 20px auto 0; padding: 0 20px; display: none; }
     .error-banner.visible { display: block; }
     .error-inner {
-      background: #fff0ed;
-      border: 1px solid #f5c5b8;
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: .88rem;
-      color: #b04020;
-      line-height: 1.5;
+      background: #fff0ed; border: 1px solid #f5c5b8;
+      border-radius: 10px; padding: 14px 18px;
+      font-size: .88rem; color: #b04020; line-height: 1.5;
     }
 
     /* ── Results ── */
     .results-wrap { max-width: 560px; margin: 30px auto 0; padding: 0 20px; display: none; }
     .results-wrap.visible { display: flex; flex-direction: column; gap: 14px; }
     .results-header { margin-bottom: 4px; }
-    .results-header h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      font-weight: 400;
-    }
+    .results-header h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 400; }
     .results-header small { color: var(--muted); font-size: .8rem; }
 
     /* ── Route card ── */
-    .route-card { padding: 22px 22px 18px; position: relative; transition: box-shadow .2s; }
-    .route-card:hover { box-shadow: 0 4px 22px rgba(0,0,0,.1); }
-    .route-card.recommended {
-      border-color: var(--green);
-      background: var(--green-lt);
+    .route-card {
+      padding: 22px 22px 18px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: cardIn .35s ease forwards;
     }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .route-card:nth-child(1) { animation-delay: .05s; }
+    .route-card:nth-child(2) { animation-delay: .15s; }
+    .route-card:nth-child(3) { animation-delay: .25s; }
+
+    .route-card:hover { box-shadow: 0 4px 22px rgba(0,0,0,.1); transition: box-shadow .2s; }
+    .route-card.recommended { border-color: var(--green); background: var(--green-lt); }
 
     .rec-badge {
       display: none;
-      position: absolute;
-      top: -1px; right: 16px;
-      background: var(--green);
-      color: #fff;
-      font-size: .65rem;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 0 0 8px 8px;
+      position: absolute; top: -1px; right: 16px;
+      background: var(--green); color: #fff;
+      font-size: .65rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 0 0 8px 8px;
     }
     .route-card.recommended .rec-badge { display: block; }
 
     .route-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px; margin-bottom: 14px;
     }
-    .route-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.08rem;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-    .route-meta { text-align: right; flex-shrink: 0; }
+    .route-title { font-family: 'Playfair Display', serif; font-size: 1.08rem; font-weight: 600; line-height: 1.3; }
+    .route-meta  { text-align: right; flex-shrink: 0; }
     .route-duration { font-size: 1.05rem; font-weight: 600; }
-    .route-cost { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+    .route-cost     { font-size: .78rem; color: var(--muted); margin-top: 2px; }
 
     .route-legs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
     .leg-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border);
       font-size: .78rem;
     }
     .route-card.recommended .leg-pill { background: #fff; }
@@ -254,27 +253,48 @@
 
     .flaneur-take {
       font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: .9rem;
-      line-height: 1.65;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      padding-top: 12px;
+      font-style: italic; font-size: .9rem;
+      line-height: 1.65; color: var(--muted);
+      border-top: 1px solid var(--border); padding-top: 12px;
     }
     .flaneur-take::before { content: '\201C'; color: var(--accent); font-size: 1.1rem; }
     .flaneur-take::after  { content: '\201D'; color: var(--accent); font-size: 1.1rem; }
 
+    /* ── Share bar ── */
+    .share-bar {
+      max-width: 560px; margin: 0 auto; padding: 0 20px;
+      display: none;
+    }
+    .share-bar.visible { display: block; }
+    .share-inner {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .share-url {
+      flex: 1; font-size: .8rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-family: 'Inter', sans-serif;
+    }
+    .share-copy {
+      flex-shrink: 0; padding: 6px 12px;
+      border-radius: 6px; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: .78rem;
+      font-weight: 500; color: var(--muted);
+      transition: all .15s;
+    }
+    .share-copy:hover { border-color: var(--accent); color: var(--accent); }
+    .share-copy.copied { border-color: var(--green); color: var(--green); }
+
     footer {
-      text-align: center;
-      margin-top: 60px;
-      font-size: .72rem;
-      color: #c4bdb6;
-      letter-spacing: .05em;
+      text-align: center; margin-top: 52px;
+      font-size: .72rem; color: #c4bdb6; letter-spacing: .05em;
     }
 
     @media (max-width: 480px) {
-      header { padding: 36px 20px 26px; }
-      .form-card { padding: 22px 18px 20px; }
+      header { padding: 36px 20px 24px; }
+      .form-card { padding: 20px 16px 18px; }
       .route-card { padding: 18px 16px 16px; }
     }
   </style>
@@ -291,13 +311,20 @@
     <div class="form-card card">
 
       <div class="input-group">
-        <div class="input-row">
-          <span class="dot dot-from"></span>
-          <input id="origin" type="text" placeholder="From — street, landmark or suburb" autocomplete="off" />
+        <div class="ac-wrap" id="ac-wrap-from">
+          <div class="input-row">
+            <span class="dot dot-from"></span>
+            <input id="origin" type="text" placeholder="From — street, landmark or suburb" autocomplete="off" />
+          </div>
+          <div class="ac-dropdown" id="ac-from"></div>
         </div>
-        <div class="input-row">
-          <span class="dot dot-to"></span>
-          <input id="destination" type="text" placeholder="To — where are you headed?" autocomplete="off" />
+
+        <div class="ac-wrap" id="ac-wrap-to">
+          <div class="input-row">
+            <span class="dot dot-to"></span>
+            <input id="destination" type="text" placeholder="To — where are you headed?" autocomplete="off" />
+          </div>
+          <div class="ac-dropdown" id="ac-to"></div>
         </div>
       </div>
 
@@ -317,8 +344,8 @@
     <div class="loading-card card">
       <div class="spinner"></div>
       <ul class="loading-steps">
-        <li id="step-dirs">Fetching route options from Google Maps</li>
-        <li id="step-advice">Asking the local</li>
+        <li id="step-dirs">Fetching route options</li>
+        <li id="step-advice">Consulting the local</li>
         <li id="step-render">Preparing your routes</li>
       </ul>
     </div>
@@ -326,6 +353,13 @@
 
   <div class="error-banner" id="errorBanner">
     <div class="error-inner" id="errorText"></div>
+  </div>
+
+  <div class="share-bar" id="shareBar">
+    <div class="share-inner">
+      <span class="share-url" id="shareUrl"></span>
+      <button class="share-copy" id="shareCopy">Copy link</button>
+    </div>
   </div>
 
   <div class="results-wrap" id="resultsWrap">
@@ -342,6 +376,84 @@
 <script>
   const PROXY = 'https://flaneur-proxy.onrender.com';
 
+  /* ── Session token for Places billing ── */
+  let sessionToken = crypto.randomUUID();
+
+  /* ── Autocomplete ── */
+  function setupAutocomplete(inputId, dropdownId) {
+    const input    = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    let debounce, highlighted = -1, suggestions = [];
+
+    const close = () => {
+      dropdown.classList.remove('open');
+      highlighted = -1;
+    };
+
+    const render = (preds) => {
+      suggestions = preds;
+      if (!preds.length) { close(); return; }
+      dropdown.innerHTML = preds.map((p, i) => {
+        const main = p.structured_formatting?.main_text   || p.description;
+        const sub  = p.structured_formatting?.secondary_text || '';
+        return `<div class="ac-item" data-i="${i}">
+          <div class="ac-main">${main}</div>
+          ${sub ? `<div class="ac-sub">${sub}</div>` : ''}
+        </div>`;
+      }).join('');
+      dropdown.classList.add('open');
+
+      dropdown.querySelectorAll('.ac-item').forEach(el => {
+        el.addEventListener('mousedown', e => {
+          e.preventDefault();
+          select(parseInt(el.dataset.i));
+        });
+      });
+    };
+
+    const select = (i) => {
+      input.value = suggestions[i]?.description || '';
+      sessionToken = crypto.randomUUID(); // new token after selection
+      close();
+    };
+
+    const highlight = (dir) => {
+      const items = dropdown.querySelectorAll('.ac-item');
+      if (!items.length) return;
+      items[highlighted]?.classList.remove('highlighted');
+      highlighted = (highlighted + dir + items.length) % items.length;
+      items[highlighted]?.classList.add('highlighted');
+    };
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounce);
+      const q = input.value.trim();
+      if (q.length < 2) { close(); return; }
+      debounce = setTimeout(async () => {
+        try {
+          const r = await fetch(
+            `${PROXY}/autocomplete?input=${encodeURIComponent(q)}&sessiontoken=${sessionToken}`
+          );
+          const d = await r.json();
+          render(d.predictions || []);
+        } catch { close(); }
+      }, 280);
+    });
+
+    input.addEventListener('keydown', e => {
+      if (!dropdown.classList.contains('open')) return;
+      if (e.key === 'ArrowDown')  { e.preventDefault(); highlight(1); }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); highlight(-1); }
+      if (e.key === 'Enter' && highlighted >= 0) { e.preventDefault(); select(highlighted); }
+      if (e.key === 'Escape')     close();
+    });
+
+    input.addEventListener('blur', () => setTimeout(close, 150));
+  }
+
+  setupAutocomplete('origin', 'ac-from');
+  setupAutocomplete('destination', 'ac-to');
+
   /* ── Prefs ── */
   document.querySelectorAll('.pref-btn').forEach(btn =>
     btn.addEventListener('click', () => btn.classList.toggle('active'))
@@ -355,47 +467,52 @@
     if (el) el.className = state;
   };
 
-  /* ── Icon map: Tabler → emoji ── */
+  /* ── Icon map ── */
   const ICON_MAP = {
-    'ti-walk':  '🚶',
-    'ti-bus':   '🚌',
-    'ti-train': '🚆',
-    'ti-car':   '🚕',
-    'ti-tram':  '🚊',
-    'ti-ferry': '⛴️',
-    'walk':     '🚶',
-    'transit':  '🚇',
-    'driving':  '🚕',
+    'ti-walk': '🚶', 'ti-bus': '🚌', 'ti-train': '🚆',
+    'ti-car': '🚕', 'ti-tram': '🚊', 'ti-ferry': '⛴️',
+    'walk': '🚶', 'transit': '🚇', 'driving': '🚕',
   };
   const icon = s => ICON_MAP[s] || '🗺️';
 
-  /* ── Parse Google directions into a readable summary ── */
+  /* ── Summarise directions for prompt ── */
   function summarise(result, mode) {
     if (!result?.routes?.length) return `${mode}: not available`;
-    const leg   = result.routes[0].legs[0];
-    const dur   = leg?.duration?.text  || '?';
-    const dist  = leg?.distance?.text  || '?';
-    const fare  = result.routes[0].fare
-      ? `fare ~${result.routes[0].fare.currency}${result.routes[0].fare.value}`
-      : '';
-    const steps = (leg?.steps || []).slice(0, 6).map(s => {
+    const leg  = result.routes[0].legs[0];
+    const dur  = leg?.duration?.text  || '?';
+    const dist = leg?.distance?.text  || '?';
+    const fare = result.routes[0].fare
+      ? `fare ~${result.routes[0].fare.currency}${result.routes[0].fare.value}` : '';
+    const steps = (leg?.steps || []).slice(0, 8).map(s => {
       if (s.transit_details) {
         const td = s.transit_details;
         const line = td.line?.short_name || td.line?.name || '';
-        return `[transit${line ? ' ' + line : ''}: ${td.departure_stop?.name || ''} → ${td.arrival_stop?.name || ''}]`;
+        const vtype = td.line?.vehicle?.type || '';
+        const stops = td.num_stops ? ` (${td.num_stops} stops)` : '';
+        return `[${vtype || 'transit'} ${line}: ${td.departure_stop?.name} → ${td.arrival_stop?.name}${stops}]`;
       }
-      const instr = (s.html_instructions || '').replace(/<[^>]+>/g, '').slice(0, 50);
-      return `[${(s.travel_mode || 'walk').toLowerCase()}: ${instr}]`;
+      const instr = (s.html_instructions || '').replace(/<[^>]+>/g, '').slice(0, 60);
+      return `[${(s.travel_mode||'walk').toLowerCase()}: ${instr}]`;
     }).join(' ');
     return `${mode.toUpperCase()}: ${dur}, ${dist}${fare ? ', ' + fare : ''}. ${steps}`;
   }
 
   /* ── Build prompt ── */
   function buildPrompt(origin, dest, transit, walking, driving, prefs) {
+    const now  = new Date();
+    const day  = now.toLocaleDateString('en', { weekday: 'long' });
+    const time = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
     const prefStr = prefs.length
-      ? `User preferences: ${prefs.join(', ')}.`
-      : 'No specific preferences stated.';
+      ? `User preferences: ${prefs.map(p => ({
+          walk: 'wants to walk some of the way',
+          scenic: 'wants the scenic or interesting route',
+          speed: 'wants to arrive as quickly as possible',
+          cheap: 'wants to minimise cost'
+        })[p] || p).join('; ')}.`
+      : 'No specific preferences.';
+
     return `Journey: from "${origin}" to "${dest}".
+Time: ${day}, ${time}.
 
 ${summarise(transit, 'transit')}
 ${summarise(walking, 'walking')}
@@ -403,202 +520,33 @@ ${summarise(driving, 'driving/taxi')}
 
 ${prefStr}
 
-Recommend 2-3 routes. Mark one as recommended.`;
+Think creatively. Don't just give back the three Google modes — consider whether a hybrid makes sense (e.g. transit part-way then walk, or walk to avoid a bad interchange). Always return exactly 3 routes.`;
   }
 
   /* ── Fetch helpers ── */
   const fetchDirections = (origin, dest, mode) =>
     fetch(`${PROXY}/directions?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&mode=${mode}`)
-      .then(r => r.ok ? r.json() : null)
-      .catch(() => null);
+      .then(r => r.ok ? r.json() : null).catch(() => null);
 
   const fetchAdvice = prompt =>
     fetch(`${PROXY}/advice`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
-    }).then(r => {
-      if (!r.ok) throw new Error(`Advice endpoint ${r.status}`);
+    }).then(async r => {
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.error || `Advice endpoint ${r.status}`);
+      }
       return r.json();
     });
 
   /* ── Parse advice response ── */
   function parseRoutes(raw) {
-    // Anthropic Messages API: { content: [{type:'text', text:'...'}] }
     let text = '';
-    if (typeof raw === 'string') {
-      text = raw;
-    } else if (Array.isArray(raw?.content)) {
-      text = raw.content.find(c => c.type === 'text')?.text || '';
-    } else if (raw?.completion) {
-      text = raw.completion;
-    } else {
-      text = JSON.stringify(raw);
-    }
+    if (typeof raw === 'string') text = raw;
+    else if (Array.isArray(raw?.content)) text = raw.content.find(c => c.type === 'text')?.text || '';
+    else if (raw?.completion) text = raw.completion;
+    else text = JSON.stringify(raw);
 
-    // Strip markdown fences
-    text = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
-
-    // Parse
-    const parsed = JSON.parse(text);
-
-    // Handle both { routes: [...] } and plain array
-    return Array.isArray(parsed) ? parsed : (parsed.routes || []);
-  }
-
-  /* ── Fallback if Claude parse fails ── */
-  function fallbackRoutes(transit, walking, driving) {
-    const routes = [];
-    if (transit?.routes?.length) {
-      const leg = transit.routes[0].legs[0];
-      routes.push({
-        title: 'By public transport',
-        recommended: true,
-        duration: leg?.duration?.text || '—',
-        cost: transit.routes[0].fare
-          ? `~${transit.routes[0].fare.currency}${transit.routes[0].fare.value}`
-          : 'Transit fare',
-        legs: [{ icon: 'ti-bus', label: `${leg?.distance?.text || ''} via transit` }],
-        flaneur_take: 'The classic city move — let the network do the work.'
-      });
-    }
-    if (walking?.routes?.length) {
-      const leg = walking.routes[0].legs[0];
-      routes.push({
-        title: 'On foot',
-        recommended: false,
-        duration: leg?.duration?.text || '—',
-        cost: 'Free',
-        legs: [{ icon: 'ti-walk', label: `Walk ${leg?.distance?.text || ''}` }],
-        flaneur_take: 'The most honest way to know a city. You\'ll notice things no one else does.'
-      });
-    }
-    if (driving?.routes?.length) {
-      const leg = driving.routes[0].legs[0];
-      routes.push({
-        title: 'Taxi direct',
-        recommended: false,
-        duration: leg?.duration?.text || '—',
-        cost: 'Taxi fare',
-        legs: [{ icon: 'ti-car', label: `Drive ${leg?.distance?.text || ''}` }],
-        flaneur_take: 'Door to door, no fuss. Worth it when time is the asset.'
-      });
-    }
-    if (!routes.length) routes.push({
-      title: 'Route found', recommended: true,
-      duration: '—', cost: '—', legs: [],
-      flaneur_take: 'We found your journey — check the details above.'
-    });
-    return routes;
-  }
-
-  /* ── Render ── */
-  function renderCards(routes, origin, dest) {
-    document.getElementById('routeSubhead').textContent = `${origin}  →  ${dest}`;
-    const wrap = document.getElementById('routeCards');
-    wrap.innerHTML = '';
-
-    // Recommended first
-    const sorted = [...routes].sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0));
-
-    sorted.forEach(r => {
-      const card = document.createElement('div');
-      card.className = 'route-card card' + (r.recommended ? ' recommended' : '');
-
-      const legs = (r.legs || []).map(l =>
-        `<span class="leg-pill"><span class="leg-icon">${icon(l.icon)}</span>${l.label}</span>`
-      ).join('');
-
-      card.innerHTML = `
-        <span class="rec-badge">Recommended</span>
-        <div class="route-top">
-          <div class="route-title">${r.title || 'Route'}</div>
-          <div class="route-meta">
-            <div class="route-duration">${r.duration || '—'}</div>
-            <div class="route-cost">${r.cost || ''}</div>
-          </div>
-        </div>
-        ${legs ? `<div class="route-legs">${legs}</div>` : ''}
-        <div class="flaneur-take">${r.flaneur_take || ''}</div>
-      `;
-      wrap.appendChild(card);
-    });
-  }
-
-  /* ── Submit ── */
-  document.getElementById('findBtn').addEventListener('click', async () => {
-    const origin = document.getElementById('origin').value.trim();
-    const dest   = document.getElementById('destination').value.trim();
-    if (!origin || !dest) {
-      document.getElementById(origin ? 'destination' : 'origin').focus();
-      return;
-    }
-
-    const btn     = document.getElementById('findBtn');
-    const loading = document.getElementById('loadingWrap');
-    const error   = document.getElementById('errorBanner');
-    const results = document.getElementById('resultsWrap');
-
-    btn.disabled = true;
-    btn.textContent = 'Finding your route…';
-    loading.classList.add('visible');
-    error.classList.remove('visible');
-    results.classList.remove('visible');
-
-    setStep('step-dirs', 'active');
-    setStep('step-advice', '');
-    setStep('step-render', '');
-
-    try {
-      const [transit, walking, driving] = await Promise.all([
-        fetchDirections(origin, dest, 'transit'),
-        fetchDirections(origin, dest, 'walking'),
-        fetchDirections(origin, dest, 'driving'),
-      ]);
-
-      if (!transit && !walking && !driving)
-        throw new Error('No directions returned — double-check your locations and try again.');
-
-      setStep('step-dirs', 'done');
-      setStep('step-advice', 'active');
-
-      const prompt = buildPrompt(origin, dest, transit, walking, driving, activePrefs());
-      const raw    = await fetchAdvice(prompt);
-
-      setStep('step-advice', 'done');
-      setStep('step-render', 'active');
-
-      let routes;
-      try {
-        routes = parseRoutes(raw);
-        if (!routes.length) throw new Error('empty');
-      } catch (e) {
-        console.warn('Parse failed, using fallback:', e);
-        routes = fallbackRoutes(transit, walking, driving);
-      }
-
-      setStep('step-render', 'done');
-      loading.classList.remove('visible');
-      renderCards(routes, origin, dest);
-      results.classList.add('visible');
-
-    } catch (err) {
-      console.error(err);
-      loading.classList.remove('visible');
-      document.getElementById('errorText').textContent =
-        err.message || 'Something went wrong. Please try again.';
-      error.classList.add('visible');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Find my route';
-    }
-  });
-
-  ['origin', 'destination'].forEach(id =>
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('findBtn').click();
-    })
-  );
-</script>
-</body>
-</html>
+    text =

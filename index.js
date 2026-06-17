@@ -9,6 +9,7 @@ app.use(express.json());
 
 const GOOGLE_KEY    = process.env.GOOGLE_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const MODEL         = 'claude-sonnet-4-5';
 
 const ANTHROPIC_HEADERS = {
   'x-api-key':         ANTHROPIC_KEY,
@@ -16,14 +17,27 @@ const ANTHROPIC_HEADERS = {
   'content-type':      'application/json'
 };
 
-const MODEL = 'claude-sonnet-4-5';
+// Google Places autocomplete
+app.get('/autocomplete', async (req, res) => {
+  try {
+    const { input, sessiontoken } = req.query;
+    if (!input) return res.json({ predictions: [] });
+    const response = await axios.get(
+      'https://maps.googleapis.com/maps/api/place/autocomplete/json',
+      { params: { input, key: GOOGLE_KEY, sessiontoken, types: 'geocode' } }
+    );
+    res.json(response.data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 app.get('/directions', async (req, res) => {
   try {
     const { origin, destination, mode } = req.query;
     const response = await axios.get(
       'https://maps.googleapis.com/maps/api/directions/json',
-      { params: { origin, destination, mode, key: GOOGLE_KEY, region: 'au' } }
+      { params: { origin, destination, mode, key: GOOGLE_KEY } }
     );
     res.json(response.data);
   } catch (e) {
@@ -41,19 +55,30 @@ app.post('/advice', async (req, res) => {
       'https://api.anthropic.com/v1/messages',
       {
         model: MODEL,
-        max_tokens: 1024,
-        system: `You are Flaneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
+        max_tokens: 1500,
+        system: `You are Flâneur, a brilliantly opinionated local guide for any city in the world. You give transport advice the way a smart, well-travelled friend would — not just the fastest or cheapest route, but the *right* route given who's asking and why.
 
-Return ONLY valid JSON, no markdown, no preamble:
+Your job is to recommend exactly 3 routes, ordered from most to least recommended. Think creatively about combinations — a route might be "walk to avoid a hellish interchange", or "the slower train because it has tables and you can work", or "metro halfway then walk through the interesting part". Don't just parrot the three Google modes back. Synthesise.
+
+Consider:
+- Time of day and day of week (rush hour vs weekend)
+- The character of the journey (city grid, creekside trail, underground tunnel)
+- Whether changing transit is worth it vs walking between stops
+- Hidden costs: time spent waiting, standing in a tunnel, dealing with luggage, navigating confusing interchanges
+- What the user actually asked for via their preferences
+
+Return ONLY valid JSON, no markdown, no preamble — exactly this structure:
 {
   "routes": [
     {
-      "title": "short descriptive title",
+      "title": "evocative 4-6 word title",
       "recommended": true,
       "duration": "X min",
-      "cost": "free or ~$X",
-      "legs": [{"icon": "ti-walk or ti-bus or ti-train or ti-car or ti-tram", "label": "short leg description"}],
-      "flaneur_take": "1-2 sentences of honest trade-off reasoning specific to this journey"
+      "cost": "free or ~$X or ~€X or ~¥X",
+      "legs": [
+        {"icon": "ti-walk or ti-bus or ti-train or ti-car or ti-tram or ti-ferry", "label": "concise leg description"}
+      ],
+      "flaneur_take": "2-3 sentences. Be specific to this journey — name streets, lines, landmarks. Give the real trade-off. Sound like you've done this commute a hundred times."
     }
   ]
 }`,
@@ -71,35 +96,6 @@ Return ONLY valid JSON, no markdown, no preamble:
   }
 });
 
-// Try multiple models to find which ones work with this key
-app.get('/test-anthropic', async (req, res) => {
-  if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'No ANTHROPIC_API_KEY' });
-  const candidates = [
-    'claude-3-haiku-20240307',
-    'claude-3-sonnet-20240229',
-    'claude-3-opus-20240229',
-    'claude-3-5-haiku-20241022',
-    'claude-3-5-sonnet-20241022',
-    'claude-haiku-4-5-20251001',
-    'claude-sonnet-4-5',
-    'claude-opus-4-5',
-  ];
-  const results = {};
-  for (const model of candidates) {
-    try {
-      const r = await axios.post(
-        'https://api.anthropic.com/v1/messages',
-        { model, max_tokens: 8, messages: [{ role: 'user', content: 'hi' }] },
-        { headers: { ...ANTHROPIC_HEADERS, 'x-api-key': ANTHROPIC_KEY } }
-      );
-      results[model] = 'OK';
-    } catch (e) {
-      results[model] = `${e.response?.status} ${e.response?.data?.error?.type || e.message}`;
-    }
-  }
-  res.json({ activeModel: MODEL, results });
-});
-
 app.get('/health', (req, res) => res.json({
   status: 'ok',
   hasGoogleKey:    !!GOOGLE_KEY,
@@ -110,4 +106,4 @@ app.get('/health', (req, res) => res.json({
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Flaneur proxy running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Flâneur proxy running on port ${PORT}`));
