@@ -10,6 +10,12 @@ app.use(express.json());
 const GOOGLE_KEY    = process.env.GOOGLE_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
+const ANTHROPIC_HEADERS = {
+  'x-api-key':         ANTHROPIC_KEY,
+  'anthropic-version': '2023-06-01',
+  'content-type':      'application/json'
+};
+
 app.get('/directions', async (req, res) => {
   try {
     const { origin, destination, mode } = req.query;
@@ -51,13 +57,7 @@ Return ONLY valid JSON, no markdown, no preamble:
 }`,
         messages: [{ role: 'user', content: prompt }]
       },
-      {
-        headers: {
-          'x-api-key': ANTHROPIC_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        }
-      }
+      { headers: { ...ANTHROPIC_HEADERS, 'x-api-key': ANTHROPIC_KEY } }
     );
     res.json(response.data);
   } catch (e) {
@@ -69,14 +69,34 @@ Return ONLY valid JSON, no markdown, no preamble:
   }
 });
 
-// Health — exposes whether env vars are present
+// Diagnostic: hit Anthropic with a minimal request and return raw result
+app.get('/test-anthropic', async (req, res) => {
+  if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'No ANTHROPIC_API_KEY' });
+  try {
+    const response = await axios.post(
+      'https://api.anthropic.com/v1/messages',
+      {
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 32,
+        messages: [{ role: 'user', content: 'Say "ok" and nothing else.' }]
+      },
+      { headers: { ...ANTHROPIC_HEADERS, 'x-api-key': ANTHROPIC_KEY } }
+    );
+    res.json({ success: true, data: response.data });
+  } catch (e) {
+    const status = e.response?.status || 500;
+    const body   = e.response?.data;
+    console.error('Test error:', status, JSON.stringify(body));
+    res.status(status).json({ success: false, status, body });
+  }
+});
+
 app.get('/health', (req, res) => res.json({
   status: 'ok',
   hasGoogleKey:    !!GOOGLE_KEY,
   hasAnthropicKey: !!ANTHROPIC_KEY
 }));
 
-// Serve frontend
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
