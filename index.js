@@ -16,7 +16,7 @@ const ANTHROPIC_HEADERS = {
   'content-type':      'application/json'
 };
 
-const MODEL = 'claude-3-haiku-20240307';
+const MODEL = 'claude-sonnet-4-5';
 
 app.get('/directions', async (req, res) => {
   try {
