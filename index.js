@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GOOGLE_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_KEY    = process.env.GOOGLE_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 app.get('/directions', async (req, res) => {
@@ -24,6 +24,9 @@ app.get('/directions', async (req, res) => {
 });
 
 app.post('/advice', async (req, res) => {
+  if (!ANTHROPIC_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set on the server.' });
+  }
   try {
     const { prompt } = req.body;
     const response = await axios.post(
@@ -31,7 +34,7 @@ app.post('/advice', async (req, res) => {
       {
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1024,
-        system: `You are Flâneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
+        system: `You are Flaneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
 
 Return ONLY valid JSON, no markdown, no preamble:
 {
@@ -58,18 +61,23 @@ Return ONLY valid JSON, no markdown, no preamble:
     );
     res.json(response.data);
   } catch (e) {
-    // Forward the actual Anthropic error so the client can see it
     const status  = e.response?.status  || 500;
-    const message = e.response?.data?.error?.message || e.message;
-    console.error('Advice error:', status, message);
-    res.status(status).json({ error: message });
+    const body    = e.response?.data;
+    const message = body?.error?.message || body?.error || e.message;
+    console.error('Advice error:', status, JSON.stringify(body));
+    res.status(status).json({ error: message, detail: body });
   }
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+// Health — exposes whether env vars are present
+app.get('/health', (req, res) => res.json({
+  status: 'ok',
+  hasGoogleKey:    !!GOOGLE_KEY,
+  hasAnthropicKey: !!ANTHROPIC_KEY
+}));
 
 // Serve frontend
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Flâneur proxy running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Flaneur proxy running on port ${PORT}`));
