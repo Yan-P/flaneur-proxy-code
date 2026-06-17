@@ -16,6 +16,8 @@ const ANTHROPIC_HEADERS = {
   'content-type':      'application/json'
 };
 
+const MODEL = 'claude-3-haiku-20240307';
+
 app.get('/directions', async (req, res) => {
   try {
     const { origin, destination, mode } = req.query;
@@ -38,7 +40,7 @@ app.post('/advice', async (req, res) => {
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
-        model: 'claude-3-5-sonnet-20241022',
+        model: MODEL,
         max_tokens: 1024,
         system: `You are Flaneur, a smart local friend giving transport advice. Think like Rory Sutherland — fastest isn't always best, some walks are worth taking, some transfers are miserable and a cab is the obvious call. Be specific, confident, no hedging.
 
@@ -69,32 +71,40 @@ Return ONLY valid JSON, no markdown, no preamble:
   }
 });
 
-// Diagnostic: hit Anthropic with a minimal request and return raw result
+// Try multiple models to find which ones work with this key
 app.get('/test-anthropic', async (req, res) => {
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'No ANTHROPIC_API_KEY' });
-  try {
-    const response = await axios.post(
-      'https://api.anthropic.com/v1/messages',
-      {
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 32,
-        messages: [{ role: 'user', content: 'Say "ok" and nothing else.' }]
-      },
-      { headers: { ...ANTHROPIC_HEADERS, 'x-api-key': ANTHROPIC_KEY } }
-    );
-    res.json({ success: true, data: response.data });
-  } catch (e) {
-    const status = e.response?.status || 500;
-    const body   = e.response?.data;
-    console.error('Test error:', status, JSON.stringify(body));
-    res.status(status).json({ success: false, status, body });
+  const candidates = [
+    'claude-3-haiku-20240307',
+    'claude-3-sonnet-20240229',
+    'claude-3-opus-20240229',
+    'claude-3-5-haiku-20241022',
+    'claude-3-5-sonnet-20241022',
+    'claude-haiku-4-5-20251001',
+    'claude-sonnet-4-5',
+    'claude-opus-4-5',
+  ];
+  const results = {};
+  for (const model of candidates) {
+    try {
+      const r = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        { model, max_tokens: 8, messages: [{ role: 'user', content: 'hi' }] },
+        { headers: { ...ANTHROPIC_HEADERS, 'x-api-key': ANTHROPIC_KEY } }
+      );
+      results[model] = 'OK';
+    } catch (e) {
+      results[model] = `${e.response?.status} ${e.response?.data?.error?.type || e.message}`;
+    }
   }
+  res.json({ activeModel: MODEL, results });
 });
 
 app.get('/health', (req, res) => res.json({
   status: 'ok',
   hasGoogleKey:    !!GOOGLE_KEY,
-  hasAnthropicKey: !!ANTHROPIC_KEY
+  hasAnthropicKey: !!ANTHROPIC_KEY,
+  model: MODEL
 }));
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
