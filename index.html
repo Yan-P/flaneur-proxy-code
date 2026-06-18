@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>flâneur — the route a smart local would take</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚶</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -538,8 +539,4 @@ Think creatively. Don't just give back the three Google modes — consider wheth
   };
 
   const fetchDirections = (origin, dest, mode) =>
-    fetchWithTimeout(`${PROXY}/directions?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&mode=${mode}`)
-      .then(r => r.ok ? r.json() : null).catch(() => null);
-
-  const fetchAdvice = prompt =>
-    fetchWithTimeout(
+    fetchWithTimeout(`${PROXY}/directions?origin=${encodeURIComponent(origin)}&destination
