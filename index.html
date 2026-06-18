@@ -448,11 +448,17 @@
       if (e.key === 'Escape')     close();
     });
 
-    input.addEventListener('blur', () => setTimeout(close, 150));
   }
 
   setupAutocomplete('origin', 'ac-from');
   setupAutocomplete('destination', 'ac-to');
+
+  // Close any open dropdown when clicking outside an ac-wrap
+  document.addEventListener('mousedown', e => {
+    if (!e.target.closest('.ac-wrap')) {
+      document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
 
   /* ── Prefs ── */
   document.querySelectorAll('.pref-btn').forEach(btn =>
@@ -545,8 +551,4 @@ Think creatively. Don't just give back the three Google modes — consider wheth
   function parseRoutes(raw) {
     let text = '';
     if (typeof raw === 'string') text = raw;
-    else if (Array.isArray(raw?.content)) text = raw.content.find(c => c.type === 'text')?.text || '';
-    else if (raw?.completion) text = raw.completion;
-    else text = JSON.stringify(raw);
-
-    text =
+    else if (Arr
