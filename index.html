@@ -129,7 +129,7 @@
       letter-spacing: .09em; text-transform: uppercase;
       color: var(--muted); margin-bottom: 10px;
     }
-    .prefs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+    .prefs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; position: relative; z-index: 10; }
     .pref-btn {
       padding: 8px 14px;
       border-radius: 999px;
@@ -330,10 +330,10 @@
 
       <p class="prefs-label">Your vibe</p>
       <div class="prefs">
-        <button class="pref-btn" data-pref="walk">🚶 walk a bit</button>
-        <button class="pref-btn" data-pref="scenic">🌿 take the scenic option</button>
-        <button class="pref-btn" data-pref="speed">⚡ prioritise speed</button>
-        <button class="pref-btn" data-pref="cheap">💸 keep it cheap</button>
+        <button class="pref-btn" data-pref="walk" onclick="this.classList.toggle('active')">🚶 walk a bit</button>
+        <button class="pref-btn" data-pref="scenic" onclick="this.classList.toggle('active')">🌿 take the scenic option</button>
+        <button class="pref-btn" data-pref="speed" onclick="this.classList.toggle('active')">⚡ prioritise speed</button>
+        <button class="pref-btn" data-pref="cheap" onclick="this.classList.toggle('active')">💸 keep it cheap</button>
       </div>
 
       <button class="submit-btn" id="findBtn">Find my route</button>
@@ -542,13 +542,4 @@ Think creatively. Don't just give back the three Google modes — consider wheth
     }).then(async r => {
       if (!r.ok) {
         const body = await r.json().catch(() => ({}));
-        throw new Error(body.error || `Advice endpoint ${r.status}`);
-      }
-      return r.json();
-    });
-
-  /* ── Parse advice response ── */
-  function parseRoutes(raw) {
-    let text = '';
-    if (typeof raw === 'string') text = raw;
-    else if (Arr
+        throw new Error(body.error || `Advice endpoint ${r.stat
