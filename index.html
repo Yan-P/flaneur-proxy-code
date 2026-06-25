@@ -90,7 +90,11 @@
     .leg-pill { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: .78rem; }
     .route-card.recommended .leg-pill { background: #fff; }
     .leg-icon { font-size: .9rem; line-height: 1; }
-    .flaneur-take { font-family: 'Playfair Display', serif; font-style: italic; font-size: .9rem; line-height: 1.65; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; }
+    .flaneur-take { font-family: 'Playfair Display', serif; font-style: italic; font-size: .9rem; line-height: 1.65; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; margin-bottom: 14px; }
+    .nav-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; font-family: 'Inter', sans-serif; font-size: .82rem; font-weight: 500; color: var(--muted); cursor: pointer; text-decoration: none; transition: all .16s; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+    .route-card.recommended .nav-btn { border-color: var(--green); color: var(--green); }
+    .route-card.recommended .nav-btn:hover { background: #e0f0e8; }
     footer { text-align: center; margin-top: 52px; font-size: .72rem; color: #c4bdb6; letter-spacing: .05em; }
   </style>
 </head>
@@ -158,9 +162,9 @@
 <footer>flaneur &nbsp;·&nbsp; move like you belong</footer>
 <script>
 var PROXY = 'https://flaneur-proxy.onrender.com';
-var acSession = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+var acSession = Math.random().toString(36).slice(2);
 
-/* ── Autocomplete ── */
+/* -- Autocomplete -- */
 function setupAc(inputId, dropdownId) {
   var input = document.getElementById(inputId);
   var dd = document.getElementById(dropdownId);
@@ -219,7 +223,9 @@ function setupAc(inputId, dropdownId) {
   return close;
 }
 
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 var closeFrom = setupAc('origin', 'ac-from');
 var closeTo = setupAc('destination', 'ac-to');
@@ -228,22 +234,34 @@ document.addEventListener('mousedown', function(e) {
   if (!e.target.closest('.ac-wrap')) { closeFrom(); closeTo(); }
 });
 
-/* ── Prefs ── */
+/* -- Prefs -- */
 function activePrefs() {
   return Array.from(document.querySelectorAll('.pref-btn.active')).map(function(b) { return b.dataset.pref; });
 }
 
-/* ── Step indicator ── */
+/* -- Step indicator -- */
 function setStep(id, state) {
   var el = document.getElementById(id);
   if (el) el.className = state;
 }
 
-/* ── Icon map ── */
+/* -- Icon map -- */
 var ICON_MAP = { 'ti-walk': '🚶', 'ti-bus': '🚌', 'ti-train': '🚆', 'ti-car': '🚕', 'ti-tram': '🚊', 'ti-ferry': '⛴️' };
 function getIcon(s) { return ICON_MAP[s] || '🗺️'; }
 
-/* ── Summarise directions for prompt ── */
+/* -- Infer Google Maps travel mode from leg icons -- */
+function inferMode(legs) {
+  var icons = (legs || []).map(function(l) { return l.icon || ''; });
+  if (icons.some(function(i) { return i === 'ti-car'; })) return 'driving';
+  if (icons.some(function(i) { return i === 'ti-bus' || i === 'ti-train' || i === 'ti-tram' || i === 'ti-ferry'; })) return 'transit';
+  return 'walking';
+}
+
+function mapsUrl(origin, dest, mode) {
+  return 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin) + '&destination=' + encodeURIComponent(dest) + '&travelmode=' + mode;
+}
+
+/* -- Summarise directions for prompt -- */
 function summarise(result, mode) {
   if (!result || !result.routes || !result.routes.length) return mode + ': not available';
   var leg = result.routes[0].legs[0];
@@ -264,7 +282,7 @@ function summarise(result, mode) {
   return mode.toUpperCase() + ': ' + dur + ', ' + dist + (fare ? ', ' + fare : '') + '. ' + steps;
 }
 
-/* ── Build AI prompt ── */
+/* -- Build AI prompt -- */
 function buildPrompt(origin, dest, transit, walking, driving, prefs) {
   var now = new Date();
   var day = now.toLocaleDateString('en', { weekday: 'long' });
@@ -274,7 +292,7 @@ function buildPrompt(origin, dest, transit, walking, driving, prefs) {
   return 'Journey: from "' + origin + '" to "' + dest + '".\nTime: ' + day + ', ' + time + '.\n\n' + summarise(transit, 'transit') + '\n' + summarise(walking, 'walking') + '\n' + summarise(driving, 'driving/taxi') + '\n\n' + prefStr + '\n\nThink creatively. Consider hybrid routes (e.g. transit part-way then walk, or walk to a better stop). Always return exactly 3 routes.';
 }
 
-/* ── Fetch with timeout ── */
+/* -- Fetch with timeout -- */
 function fetchT(url, opts, ms) {
   var ctrl = new AbortController();
   var t = setTimeout(function() { ctrl.abort(); }, ms || 25000);
@@ -295,7 +313,7 @@ function fetchAdvice(prompt) {
     });
 }
 
-/* ── Parse AI response ── */
+/* -- Parse AI response -- */
 function parseRoutes(raw) {
   var text = '';
   if (typeof raw === 'string') text = raw;
@@ -312,21 +330,21 @@ function parseRoutes(raw) {
   return Array.isArray(parsed) ? parsed : (parsed.routes || []);
 }
 
-/* ── Fallback routes ── */
+/* -- Fallback routes -- */
 function fallbackRoutes(transit, walking, driving) {
   var routes = [];
   if (transit && transit.routes && transit.routes.length) {
     var leg = transit.routes[0].legs[0];
     routes.push({ title: 'By public transport', recommended: true,
-      duration: leg && leg.duration ? leg.duration.text : '—',
+      duration: leg && leg.duration ? leg.duration.text : '-',
       cost: transit.routes[0].fare ? '~' + transit.routes[0].fare.currency + transit.routes[0].fare.value : 'Transit fare',
       legs: [{ icon: 'ti-bus', label: leg && leg.distance ? leg.distance.text : 'via transit' }],
-      flaneur_take: 'The city network — let it do the work.' });
+      flaneur_take: 'The city network - let it do the work.' });
   }
   if (walking && walking.routes && walking.routes.length) {
     var leg2 = walking.routes[0].legs[0];
     routes.push({ title: 'On foot', recommended: !routes.length,
-      duration: leg2 && leg2.duration ? leg2.duration.text : '—',
+      duration: leg2 && leg2.duration ? leg2.duration.text : '-',
       cost: 'Free',
       legs: [{ icon: 'ti-walk', label: 'Walk ' + (leg2 && leg2.distance ? leg2.distance.text : '') }],
       flaneur_take: 'The most honest way to know a city.' });
@@ -334,40 +352,49 @@ function fallbackRoutes(transit, walking, driving) {
   if (driving && driving.routes && driving.routes.length) {
     var leg3 = driving.routes[0].legs[0];
     routes.push({ title: 'Taxi direct', recommended: !routes.length,
-      duration: leg3 && leg3.duration ? leg3.duration.text : '—',
+      duration: leg3 && leg3.duration ? leg3.duration.text : '-',
       cost: 'Taxi fare',
       legs: [{ icon: 'ti-car', label: 'Drive ' + (leg3 && leg3.distance ? leg3.distance.text : '') }],
       flaneur_take: 'Door to door. Worth it when time is the asset.' });
   }
   while (routes.length < 3) {
-    routes.push({ title: 'Alternative route', recommended: false, duration: '—', cost: '—', legs: [], flaneur_take: 'Another way to get there.' });
+    routes.push({ title: 'Alternative route', recommended: false, duration: '-', cost: '-', legs: [], flaneur_take: 'Another way to get there.' });
   }
   return routes;
 }
 
-/* ── Render cards ── */
+/* -- Render cards -- */
 function renderCards(routes, origin, dest) {
-  document.getElementById('routeSubhead').textContent = origin + '  →  ' + dest;
+  document.getElementById('routeSubhead').textContent = origin + '  >  ' + dest;
   var wrap = document.getElementById('routeCards');
   wrap.innerHTML = '';
   var sorted = routes.slice().sort(function(a, b) { return (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0); });
+  var NAV_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
   sorted.slice(0, 3).forEach(function(r) {
     var card = document.createElement('div');
     card.className = 'route-card card' + (r.recommended ? ' recommended' : '');
     var legs = (r.legs || []).map(function(l) {
       return '<span class="leg-pill"><span class="leg-icon">' + getIcon(l.icon) + '</span>' + escHtml(l.label || '') + '</span>';
     }).join('');
-    card.innerHTML = '<span class="rec-badge">Recommended</span>' +
-      '<div class="route-top"><div class="route-title">' + escHtml(r.title || 'Route') + '</div>' +
-      '<div class="route-meta"><div class="route-duration">' + escHtml(r.duration || '—') + '</div>' +
-      '<div class="route-cost">' + escHtml(r.cost || '') + '</div></div></div>' +
+    var mode = inferMode(r.legs);
+    var navHref = mapsUrl(origin, dest, mode);
+    card.innerHTML =
+      '<span class="rec-badge">Recommended</span>' +
+      '<div class="route-top">' +
+        '<div class="route-title">' + escHtml(r.title || 'Route') + '</div>' +
+        '<div class="route-meta">' +
+          '<div class="route-duration">' + escHtml(r.duration || '-') + '</div>' +
+          '<div class="route-cost">' + escHtml(r.cost || '') + '</div>' +
+        '</div>' +
+      '</div>' +
       (legs ? '<div class="route-legs">' + legs + '</div>' : '') +
-      '<div class="flaneur-take">“' + escHtml(r.flaneur_take || '') + '”</div>';
+      '<div class="flaneur-take">"' + escHtml(r.flaneur_take || '') + '"</div>' +
+      '<a class="nav-btn" href="' + navHref + '" target="_blank" rel="noopener">' + NAV_ICON + ' Open in Google Maps</a>';
     wrap.appendChild(card);
   });
 }
 
-/* ── Share URL ── */
+/* -- Share URL -- */
 function updateURL(origin, dest, prefs) {
   var params = new URLSearchParams({ from: origin, to: dest });
   if (prefs.length) params.set('prefs', prefs.join(','));
@@ -387,7 +414,7 @@ document.getElementById('shareCopy').addEventListener('click', function() {
   });
 });
 
-/* ── Main search ── */
+/* -- Main search -- */
 var searching = false;
 
 async function doSearch(origin, dest, prefs) {
@@ -395,7 +422,7 @@ async function doSearch(origin, dest, prefs) {
   searching = true;
   var btn = document.getElementById('findBtn');
   btn.disabled = true;
-  btn.textContent = 'Finding your route…';
+  btn.textContent = 'Finding your route...';
   document.getElementById('loadingWrap').classList.add('visible');
   document.getElementById('errorBanner').classList.remove('visible');
   document.getElementById('resultsWrap').classList.remove('visible');
@@ -411,7 +438,7 @@ async function doSearch(origin, dest, prefs) {
       fetchDirs(origin, dest, 'driving')
     ]);
     var transit = results[0], walking = results[1], driving = results[2];
-    if (!transit && !walking && !driving) throw new Error('No directions found — check your locations and try again.');
+    if (!transit && !walking && !driving) throw new Error('No directions found - check your locations and try again.');
 
     setStep('step-dirs', 'done');
     setStep('step-advice', 'active');
@@ -439,7 +466,8 @@ async function doSearch(origin, dest, prefs) {
   } catch (err) {
     console.error(err);
     document.getElementById('loadingWrap').classList.remove('visible');
-    document.getElementById('errorText').textContent = err.name === 'AbortError' ? 'Request timed out — the server may be warming up, please try again.' : (err.message || 'Something went wrong.');
+    var msg = err.name === 'AbortError' ? 'Request timed out - the server may be warming up, please try again.' : (err.message || 'Something went wrong.');
+    document.getElementById('errorText').textContent = msg;
     document.getElementById('errorBanner').classList.add('visible');
   } finally {
     searching = false;
@@ -448,7 +476,7 @@ async function doSearch(origin, dest, prefs) {
   }
 }
 
-/* ── Find button ── */
+/* -- Find button -- */
 document.getElementById('findBtn').addEventListener('click', function() {
   var origin = document.getElementById('origin').value.trim();
   var dest = document.getElementById('destination').value.trim();
@@ -457,7 +485,7 @@ document.getElementById('findBtn').addEventListener('click', function() {
   doSearch(origin, dest, activePrefs());
 });
 
-/* ── Enter key ── */
+/* -- Enter key -- */
 ['origin', 'destination'].forEach(function(id) {
   document.getElementById(id).addEventListener('keydown', function(e) {
     var dropId = id === 'origin' ? 'ac-from' : 'ac-to';
@@ -469,7 +497,7 @@ document.getElementById('findBtn').addEventListener('click', function() {
   });
 });
 
-/* ── Pre-fill from URL (no auto-search) ── */
+/* -- Pre-fill from URL (no auto-search) -- */
 (function() {
   var p = new URLSearchParams(location.search);
   var from = p.get('from'), to = p.get('to');
