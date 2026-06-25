@@ -10,317 +10,107 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:        #f7f4ef;
-      --surface:   #ffffff;
-      --border:    #e2ddd6;
-      --text:      #1c1a17;
-      --muted:     #7a7368;
-      --accent:    #c96a35;
-      --accent-lt: #f5e8de;
-      --green:     #3a7d5a;
-      --green-lt:  #f0f8f4;
-      --radius:    14px;
-      --shadow:    0 2px 16px rgba(0,0,0,.07);
+      --bg: #f7f4ef; --surface: #ffffff; --border: #e2ddd6;
+      --text: #1c1a17; --muted: #7a7368; --accent: #c96a35;
+      --accent-lt: #f5e8de; --green: #3a7d5a; --green-lt: #f0f8f4;
+      --radius: 14px; --shadow: 0 2px 16px rgba(0,0,0,.07);
     }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 0 0 80px;
-    }
-
-    /* ── Header ── */
-    header {
-      text-align: center;
-      padding: 52px 24px 36px;
-    }
-    header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.6rem, 7vw, 4.2rem);
-      font-weight: 400;
-      letter-spacing: -0.01em;
-    }
-    header p {
-      margin-top: 8px;
-      font-size: .85rem;
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-    }
-
-    /* ── Card ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    /* ── Form ── */
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 80px; }
+    header { text-align: center; padding: 52px 24px 36px; }
+    header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.6rem, 7vw, 4.2rem); font-weight: 400; letter-spacing: -0.01em; }
+    header p { margin-top: 8px; font-size: .85rem; font-weight: 300; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
     .form-wrap { max-width: 560px; margin: 0 auto; padding: 0 20px; }
-    .form-card  { padding: 30px 26px 26px; }
-
+    .form-card { padding: 30px 26px 26px; }
     .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
-
-    /* autocomplete wrapper */
     .ac-wrap { position: relative; }
-
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 0 14px;
-      transition: border-color .18s;
-    }
+    .input-row { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0 14px; transition: border-color .18s; }
     .input-row:focus-within { border-color: var(--accent); }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .dot-from { background: var(--accent); }
-    .dot-to   { background: var(--text); }
-    .input-row input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 14px 0;
-      font-family: 'Inter', sans-serif;
-      font-size: .95rem;
-      color: var(--text);
-      outline: none;
-    }
+    .dot-to { background: var(--text); }
+    .input-row input { flex: 1; border: none; background: transparent; padding: 14px 0; font-family: 'Inter', sans-serif; font-size: .95rem; color: var(--text); outline: none; }
     .input-row input::placeholder { color: #b5afa8; }
-
-    /* ── Autocomplete dropdown ── */
-    .ac-dropdown {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.12);
-      z-index: 100;
-      overflow: hidden;
-      display: none;
-    }
+    .ac-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 100; overflow: hidden; display: none; }
     .ac-dropdown.open { display: block; }
-    .ac-item {
-      padding: 11px 14px;
-      font-size: .88rem;
-      cursor: pointer;
-      color: var(--text);
-      border-bottom: 1px solid var(--border);
-      line-height: 1.35;
-      transition: background .12s;
-    }
+    .ac-item { padding: 11px 14px; font-size: .88rem; cursor: pointer; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.35; transition: background .12s; }
     .ac-item:last-child { border-bottom: none; }
     .ac-item:hover, .ac-item.highlighted { background: var(--accent-lt); }
     .ac-item .ac-main { font-weight: 500; }
-    .ac-item .ac-sub  { font-size: .78rem; color: var(--muted); margin-top: 1px; }
-
-    /* ── Preferences ── */
-    .prefs-label {
-      font-size: .72rem; font-weight: 600;
-      letter-spacing: .09em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 10px;
-    }
+    .ac-item .ac-sub { font-size: .78rem; color: var(--muted); margin-top: 1px; }
+    .prefs-label { font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
     .prefs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; position: relative; z-index: 10; }
-    .pref-btn {
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      font-family: 'Inter', sans-serif;
-      font-size: .82rem;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .16s ease;
-      user-select: none;
-    }
+    .pref-btn { padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: transparent; font-family: 'Inter', sans-serif; font-size: .82rem; color: var(--muted); cursor: pointer; transition: all .16s ease; user-select: none; }
     .pref-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .pref-btn.active {
-      background: var(--accent-lt);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    /* ── Submit ── */
-    .submit-btn {
-      width: 100%;
-      padding: 15px;
-      border-radius: 10px;
-      border: none;
-      background: var(--text);
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: .95rem;
-      font-weight: 500;
-      cursor: pointer;
-      letter-spacing: .02em;
-      transition: background .18s, transform .1s;
-    }
+    .pref-btn.active { background: var(--accent-lt); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+    .submit-btn { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--text); color: #fff; font-family: 'Inter', sans-serif; font-size: .95rem; font-weight: 500; cursor: pointer; letter-spacing: .02em; transition: background .18s, transform .1s; }
     .submit-btn:hover:not(:disabled) { background: #2d2a25; }
     .submit-btn:active:not(:disabled) { transform: scale(.99); }
     .submit-btn:disabled { background: #c4bdb6; cursor: not-allowed; }
-
-    /* ── Loading ── */
     .loading-wrap { max-width: 560px; margin: 28px auto 0; padding: 0 20px; display: none; }
     .loading-wrap.visible { display: block; }
     .loading-card { padding: 28px 24px; text-align: center; }
-    .spinner {
-      width: 34px; height: 34px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
-      margin: 0 auto 18px;
-    }
+    .spinner { width: 34px; height: 34px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 18px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-steps { list-style: none; font-size: .84rem; color: var(--muted); line-height: 2.1; }
-    .loading-steps li.done   { color: var(--green); }
-    .loading-steps li.done::before   { content: '✓  '; }
+    .loading-steps li.done { color: var(--green); }
+    .loading-steps li.done::before { content: '+ '; }
     .loading-steps li.active { color: var(--text); font-weight: 500; }
-    .loading-steps li.active::before { content: '→  '; }
-
-    /* ── Error ── */
+    .loading-steps li.active::before { content: '> '; }
     .error-banner { max-width: 560px; margin: 20px auto 0; padding: 0 20px; display: none; }
     .error-banner.visible { display: block; }
-    .error-inner {
-      background: #fff0ed; border: 1px solid #f5c5b8;
-      border-radius: 10px; padding: 14px 18px;
-      font-size: .88rem; color: #b04020; line-height: 1.5;
-    }
-
-    /* ── Results ── */
-    .results-wrap { max-width: 560px; margin: 30px auto 0; padding: 0 20px; display: none; }
-    .results-wrap.visible { display: flex; flex-direction: column; gap: 14px; }
+    .error-inner { background: #fff0ed; border: 1px solid #f5c5b8; border-radius: 10px; padding: 14px 18px; font-size: .88rem; color: #b04020; line-height: 1.5; }
+    .share-bar { max-width: 560px; margin: 16px auto 0; padding: 0 20px; display: none; }
+    .share-bar.visible { display: block; }
+    .share-inner { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+    .share-url { flex: 1; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .share-copy { flex-shrink: 0; padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; font-family: 'Inter', sans-serif; font-size: .78rem; font-weight: 500; color: var(--muted); transition: all .15s; }
+    .share-copy:hover { border-color: var(--accent); color: var(--accent); }
+    .share-copy.copied { border-color: var(--green); color: var(--green); }
+    .results-wrap { max-width: 560px; margin: 30px auto 0; padding: 0 20px; display: none; flex-direction: column; gap: 14px; }
+    .results-wrap.visible { display: flex; }
     .results-header { margin-bottom: 4px; }
     .results-header h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 400; }
     .results-header small { color: var(--muted); font-size: .8rem; }
-
-    /* ── Route card ── */
-    .route-card {
-      padding: 22px 22px 18px;
-      position: relative;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: cardIn .35s ease forwards;
-    }
-    @keyframes cardIn {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .route-card { padding: 22px 22px 18px; position: relative; opacity: 0; transform: translateY(10px); animation: cardIn .35s ease forwards; }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
     .route-card:nth-child(1) { animation-delay: .05s; }
     .route-card:nth-child(2) { animation-delay: .15s; }
     .route-card:nth-child(3) { animation-delay: .25s; }
-
-    .route-card:hover { box-shadow: 0 4px 22px rgba(0,0,0,.1); transition: box-shadow .2s; }
     .route-card.recommended { border-color: var(--green); background: var(--green-lt); }
-
-    .rec-badge {
-      display: none;
-      position: absolute; top: -1px; right: 16px;
-      background: var(--green); color: #fff;
-      font-size: .65rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      padding: 4px 10px; border-radius: 0 0 8px 8px;
-    }
+    .rec-badge { display: none; position: absolute; top: -1px; right: 16px; background: var(--green); color: #fff; font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 0 0 8px 8px; }
     .route-card.recommended .rec-badge { display: block; }
-
-    .route-top {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 12px; margin-bottom: 14px;
-    }
+    .route-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
     .route-title { font-family: 'Playfair Display', serif; font-size: 1.08rem; font-weight: 600; line-height: 1.3; }
-    .route-meta  { text-align: right; flex-shrink: 0; }
+    .route-meta { text-align: right; flex-shrink: 0; }
     .route-duration { font-size: 1.05rem; font-weight: 600; }
-    .route-cost     { font-size: .78rem; color: var(--muted); margin-top: 2px; }
-
+    .route-cost { font-size: .78rem; color: var(--muted); margin-top: 2px; }
     .route-legs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-    .leg-pill {
-      display: flex; align-items: center; gap: 5px;
-      padding: 5px 10px; border-radius: 999px;
-      background: var(--surface); border: 1px solid var(--border);
-      font-size: .78rem;
-    }
+    .leg-pill { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: .78rem; }
     .route-card.recommended .leg-pill { background: #fff; }
     .leg-icon { font-size: .9rem; line-height: 1; }
-
-    .flaneur-take {
-      font-family: 'Playfair Display', serif;
-      font-style: italic; font-size: .9rem;
-      line-height: 1.65; color: var(--muted);
-      border-top: 1px solid var(--border); padding-top: 12px;
-    }
-    .flaneur-take::before { content: '\201C'; color: var(--accent); font-size: 1.1rem; }
-    .flaneur-take::after  { content: '\201D'; color: var(--accent); font-size: 1.1rem; }
-
-    /* ── Share bar ── */
-    .share-bar {
-      max-width: 560px; margin: 0 auto; padding: 0 20px;
-      display: none;
-    }
-    .share-bar.visible { display: block; }
-    .share-inner {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 14px;
-    }
-    .share-url {
-      flex: 1; font-size: .8rem; color: var(--muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      font-family: 'Inter', sans-serif;
-    }
-    .share-copy {
-      flex-shrink: 0; padding: 6px 12px;
-      border-radius: 6px; border: 1.5px solid var(--border);
-      background: transparent; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: .78rem;
-      font-weight: 500; color: var(--muted);
-      transition: all .15s;
-    }
-    .share-copy:hover { border-color: var(--accent); color: var(--accent); }
-    .share-copy.copied { border-color: var(--green); color: var(--green); }
-
-    footer {
-      text-align: center; margin-top: 52px;
-      font-size: .72rem; color: #c4bdb6; letter-spacing: .05em;
-    }
-
-    @media (max-width: 480px) {
-      header { padding: 36px 20px 24px; }
-      .form-card { padding: 20px 16px 18px; }
-      .route-card { padding: 18px 16px 16px; }
-    }
+    .flaneur-take { font-family: 'Playfair Display', serif; font-style: italic; font-size: .9rem; line-height: 1.65; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; }
+    footer { text-align: center; margin-top: 52px; font-size: .72rem; color: #c4bdb6; letter-spacing: .05em; }
   </style>
 </head>
 <body>
-
 <header>
   <h1>flâneur</h1>
   <p>the route a smart local would take</p>
 </header>
-
 <main>
   <div class="form-wrap">
     <div class="form-card card">
-
       <div class="input-group">
-        <div class="ac-wrap" id="ac-wrap-from">
+        <div class="ac-wrap">
           <div class="input-row">
             <span class="dot dot-from"></span>
             <input id="origin" type="text" placeholder="From — street, landmark or suburb" autocomplete="off" />
           </div>
           <div class="ac-dropdown" id="ac-from"></div>
         </div>
-
-        <div class="ac-wrap" id="ac-wrap-to">
+        <div class="ac-wrap">
           <div class="input-row">
             <span class="dot dot-to"></span>
             <input id="destination" type="text" placeholder="To — where are you headed?" autocomplete="off" />
@@ -328,19 +118,16 @@
           <div class="ac-dropdown" id="ac-to"></div>
         </div>
       </div>
-
       <p class="prefs-label">Your vibe</p>
       <div class="prefs">
-        <button class="pref-btn" data-pref="walk" onclick="this.classList.toggle('active')">🚶 walk a bit</button>
-        <button class="pref-btn" data-pref="scenic" onclick="this.classList.toggle('active')">🌿 take the scenic option</button>
-        <button class="pref-btn" data-pref="speed" onclick="this.classList.toggle('active')">⚡ prioritise speed</button>
-        <button class="pref-btn" data-pref="cheap" onclick="this.classList.toggle('active')">💸 keep it cheap</button>
+        <button class="pref-btn" data-pref="walk" onclick="this.classList.toggle('active')">walk a bit</button>
+        <button class="pref-btn" data-pref="scenic" onclick="this.classList.toggle('active')">take the scenic option</button>
+        <button class="pref-btn" data-pref="speed" onclick="this.classList.toggle('active')">prioritise speed</button>
+        <button class="pref-btn" data-pref="cheap" onclick="this.classList.toggle('active')">keep it cheap</button>
       </div>
-
       <button class="submit-btn" id="findBtn">Find my route</button>
     </div>
   </div>
-
   <div class="loading-wrap" id="loadingWrap">
     <div class="loading-card card">
       <div class="spinner"></div>
@@ -351,18 +138,15 @@
       </ul>
     </div>
   </div>
-
   <div class="error-banner" id="errorBanner">
     <div class="error-inner" id="errorText"></div>
   </div>
-
   <div class="share-bar" id="shareBar">
     <div class="share-inner">
       <span class="share-url" id="shareUrl"></span>
       <button class="share-copy" id="shareCopy">Copy link</button>
     </div>
   </div>
-
   <div class="results-wrap" id="resultsWrap">
     <div class="results-header">
       <h2>Your routes</h2>
@@ -371,172 +155,332 @@
     <div id="routeCards"></div>
   </div>
 </main>
-
-<footer>flâneur &nbsp;·&nbsp; move like you belong</footer>
-
+<footer>flaneur &nbsp;·&nbsp; move like you belong</footer>
 <script>
-  const PROXY = 'https://flaneur-proxy.onrender.com';
+var PROXY = 'https://flaneur-proxy.onrender.com';
+var acSession = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 
-  /* ── Session token for Places billing ── */
-  let sessionToken = crypto.randomUUID();
+/* ── Autocomplete ── */
+function setupAc(inputId, dropdownId) {
+  var input = document.getElementById(inputId);
+  var dd = document.getElementById(dropdownId);
+  var debounce, hiIdx = -1, preds = [];
 
-  /* ── Autocomplete ── */
-  function setupAutocomplete(inputId, dropdownId) {
-    const input    = document.getElementById(inputId);
-    const dropdown = document.getElementById(dropdownId);
-    let debounce, highlighted = -1, suggestions = [];
+  function close() { dd.classList.remove('open'); hiIdx = -1; }
 
-    const close = () => {
-      dropdown.classList.remove('open');
-      highlighted = -1;
-    };
-
-    const render = (preds) => {
-      suggestions = preds;
-      if (!preds.length) { close(); return; }
-      dropdown.innerHTML = preds.map((p, i) => {
-        const main = p.structured_formatting?.main_text   || p.description;
-        const sub  = p.structured_formatting?.secondary_text || '';
-        return `<div class="ac-item" data-i="${i}">
-          <div class="ac-main">${main}</div>
-          ${sub ? `<div class="ac-sub">${sub}</div>` : ''}
-        </div>`;
-      }).join('');
-      dropdown.classList.add('open');
-
-      dropdown.querySelectorAll('.ac-item').forEach(el => {
-        el.addEventListener('mousedown', e => {
-          e.preventDefault();
-          select(parseInt(el.dataset.i));
-        });
-      });
-    };
-
-    const select = (i) => {
-      input.value = suggestions[i]?.description || '';
-      sessionToken = crypto.randomUUID(); // new token after selection
-      close();
-    };
-
-    const highlight = (dir) => {
-      const items = dropdown.querySelectorAll('.ac-item');
-      if (!items.length) return;
-      items[highlighted]?.classList.remove('highlighted');
-      highlighted = (highlighted + dir + items.length) % items.length;
-      items[highlighted]?.classList.add('highlighted');
-    };
-
-    input.addEventListener('input', () => {
-      clearTimeout(debounce);
-      const q = input.value.trim();
-      if (q.length < 2) { close(); return; }
-      debounce = setTimeout(async () => {
-        try {
-          const r = await fetch(
-            `${PROXY}/autocomplete?input=${encodeURIComponent(q)}&sessiontoken=${sessionToken}`
-          );
-          const d = await r.json();
-          render(d.predictions || []);
-        } catch { close(); }
-      }, 280);
-    });
-
-    input.addEventListener('keydown', e => {
-      if (!dropdown.classList.contains('open')) return;
-      if (e.key === 'ArrowDown')  { e.preventDefault(); highlight(1); }
-      if (e.key === 'ArrowUp')    { e.preventDefault(); highlight(-1); }
-      if (e.key === 'Enter' && highlighted >= 0) { e.preventDefault(); select(highlighted); }
-      if (e.key === 'Escape')     close();
-    });
-
+  function selectItem(i) {
+    if (preds[i]) input.value = preds[i].description;
+    acSession = Math.random().toString(36).slice(2);
+    close();
   }
 
-  setupAutocomplete('origin', 'ac-from');
-  setupAutocomplete('destination', 'ac-to');
+  function render(list) {
+    preds = list;
+    if (!list.length) { close(); return; }
+    dd.innerHTML = list.map(function(p, i) {
+      var main = p.structured_formatting ? p.structured_formatting.main_text : p.description;
+      var sub = p.structured_formatting ? p.structured_formatting.secondary_text : '';
+      return '<div class="ac-item" data-i="' + i + '"><div class="ac-main">' + escHtml(main) + '</div>' + (sub ? '<div class="ac-sub">' + escHtml(sub) + '</div>' : '') + '</div>';
+    }).join('');
+    dd.classList.add('open');
+    dd.querySelectorAll('.ac-item').forEach(function(el) {
+      el.addEventListener('mousedown', function(e) { e.preventDefault(); selectItem(+el.dataset.i); });
+    });
+  }
 
-  // Close any open dropdown when clicking outside an ac-wrap
-  document.addEventListener('mousedown', e => {
-    if (!e.target.closest('.ac-wrap')) {
-      document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
-    }
+  function highlight(dir) {
+    var items = dd.querySelectorAll('.ac-item');
+    if (!items.length) return;
+    if (items[hiIdx]) items[hiIdx].classList.remove('highlighted');
+    hiIdx = (hiIdx + dir + items.length) % items.length;
+    items[hiIdx].classList.add('highlighted');
+  }
+
+  input.addEventListener('input', function() {
+    clearTimeout(debounce);
+    var q = input.value.trim();
+    if (q.length < 2) { close(); return; }
+    debounce = setTimeout(function() {
+      fetch(PROXY + '/autocomplete?input=' + encodeURIComponent(q) + '&sessiontoken=' + acSession)
+        .then(function(r) { return r.json(); })
+        .then(function(d) { render(d.predictions || []); })
+        .catch(function() { close(); });
+    }, 280);
   });
 
-  /* ── Prefs ── */
-  document.querySelectorAll('.pref-btn').forEach(btn =>
-    btn.addEventListener('click', () => btn.classList.toggle('active'))
-  );
-  const activePrefs = () =>
-    [...document.querySelectorAll('.pref-btn.active')].map(b => b.dataset.pref);
+  input.addEventListener('keydown', function(e) {
+    if (!dd.classList.contains('open')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); highlight(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(-1); }
+    else if (e.key === 'Enter' && hiIdx >= 0) { e.preventDefault(); selectItem(hiIdx); }
+    else if (e.key === 'Escape') close();
+  });
 
-  /* ── Step indicator ── */
-  const setStep = (id, state) => {
-    const el = document.getElementById(id);
-    if (el) el.className = state;
-  };
+  return close;
+}
 
-  /* ── Icon map ── */
-  const ICON_MAP = {
-    'ti-walk': '🚶', 'ti-bus': '🚌', 'ti-train': '🚆',
-    'ti-car': '🚕', 'ti-tram': '🚊', 'ti-ferry': '⛴️',
-    'walk': '🚶', 'transit': '🚇', 'driving': '🚕',
-  };
-  const icon = s => ICON_MAP[s] || '🗺️';
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  /* ── Summarise directions for prompt ── */
-  function summarise(result, mode) {
-    if (!result?.routes?.length) return `${mode}: not available`;
-    const leg  = result.routes[0].legs[0];
-    const dur  = leg?.duration?.text  || '?';
-    const dist = leg?.distance?.text  || '?';
-    const fare = result.routes[0].fare
-      ? `fare ~${result.routes[0].fare.currency}${result.routes[0].fare.value}` : '';
-    const steps = (leg?.steps || []).slice(0, 8).map(s => {
-      if (s.transit_details) {
-        const td = s.transit_details;
-        const line = td.line?.short_name || td.line?.name || '';
-        const vtype = td.line?.vehicle?.type || '';
-        const stops = td.num_stops ? ` (${td.num_stops} stops)` : '';
-        return `[${vtype || 'transit'} ${line}: ${td.departure_stop?.name} → ${td.arrival_stop?.name}${stops}]`;
-      }
-      const instr = (s.html_instructions || '').replace(/<[^>]+>/g, '').slice(0, 60);
-      return `[${(s.travel_mode||'walk').toLowerCase()}: ${instr}]`;
-    }).join(' ');
-    return `${mode.toUpperCase()}: ${dur}, ${dist}${fare ? ', ' + fare : ''}. ${steps}`;
+var closeFrom = setupAc('origin', 'ac-from');
+var closeTo = setupAc('destination', 'ac-to');
+
+document.addEventListener('mousedown', function(e) {
+  if (!e.target.closest('.ac-wrap')) { closeFrom(); closeTo(); }
+});
+
+/* ── Prefs ── */
+function activePrefs() {
+  return Array.from(document.querySelectorAll('.pref-btn.active')).map(function(b) { return b.dataset.pref; });
+}
+
+/* ── Step indicator ── */
+function setStep(id, state) {
+  var el = document.getElementById(id);
+  if (el) el.className = state;
+}
+
+/* ── Icon map ── */
+var ICON_MAP = { 'ti-walk': '🚶', 'ti-bus': '🚌', 'ti-train': '🚆', 'ti-car': '🚕', 'ti-tram': '🚊', 'ti-ferry': '⛴️' };
+function getIcon(s) { return ICON_MAP[s] || '🗺️'; }
+
+/* ── Summarise directions for prompt ── */
+function summarise(result, mode) {
+  if (!result || !result.routes || !result.routes.length) return mode + ': not available';
+  var leg = result.routes[0].legs[0];
+  var dur = leg && leg.duration ? leg.duration.text : '?';
+  var dist = leg && leg.distance ? leg.distance.text : '?';
+  var fare = result.routes[0].fare ? 'fare ~' + result.routes[0].fare.currency + result.routes[0].fare.value : '';
+  var steps = (leg && leg.steps ? leg.steps : []).slice(0, 8).map(function(s) {
+    if (s.transit_details) {
+      var td = s.transit_details;
+      var line = (td.line && (td.line.short_name || td.line.name)) || '';
+      var vtype = (td.line && td.line.vehicle && td.line.vehicle.type) || '';
+      var stops = td.num_stops ? ' (' + td.num_stops + ' stops)' : '';
+      return '[' + (vtype || 'transit') + ' ' + line + ': ' + (td.departure_stop ? td.departure_stop.name : '') + ' > ' + (td.arrival_stop ? td.arrival_stop.name : '') + stops + ']';
+    }
+    var instr = (s.html_instructions || '').replace(/<[^>]+>/g, '').slice(0, 60);
+    return '[' + (s.travel_mode || 'walk').toLowerCase() + ': ' + instr + ']';
+  }).join(' ');
+  return mode.toUpperCase() + ': ' + dur + ', ' + dist + (fare ? ', ' + fare : '') + '. ' + steps;
+}
+
+/* ── Build AI prompt ── */
+function buildPrompt(origin, dest, transit, walking, driving, prefs) {
+  var now = new Date();
+  var day = now.toLocaleDateString('en', { weekday: 'long' });
+  var time = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
+  var prefMap = { walk: 'wants to walk some of the way', scenic: 'wants the scenic or interesting route', speed: 'wants to arrive as quickly as possible', cheap: 'wants to minimise cost' };
+  var prefStr = prefs.length ? 'User preferences: ' + prefs.map(function(p) { return prefMap[p] || p; }).join('; ') + '.' : 'No specific preferences.';
+  return 'Journey: from "' + origin + '" to "' + dest + '".\nTime: ' + day + ', ' + time + '.\n\n' + summarise(transit, 'transit') + '\n' + summarise(walking, 'walking') + '\n' + summarise(driving, 'driving/taxi') + '\n\n' + prefStr + '\n\nThink creatively. Consider hybrid routes (e.g. transit part-way then walk, or walk to a better stop). Always return exactly 3 routes.';
+}
+
+/* ── Fetch with timeout ── */
+function fetchT(url, opts, ms) {
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, ms || 25000);
+  return fetch(url, Object.assign({}, opts || {}, { signal: ctrl.signal })).finally(function() { clearTimeout(t); });
+}
+
+function fetchDirs(origin, dest, mode) {
+  return fetchT(PROXY + '/directions?origin=' + encodeURIComponent(origin) + '&destination=' + encodeURIComponent(dest) + '&mode=' + mode)
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .catch(function() { return null; });
+}
+
+function fetchAdvice(prompt) {
+  return fetchT(PROXY + '/advice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt }) }, 40000)
+    .then(function(r) {
+      if (!r.ok) return r.json().catch(function() { return {}; }).then(function(b) { throw new Error(b.error || 'Advice endpoint error ' + r.status); });
+      return r.json();
+    });
+}
+
+/* ── Parse AI response ── */
+function parseRoutes(raw) {
+  var text = '';
+  if (typeof raw === 'string') text = raw;
+  else if (raw && Array.isArray(raw.content)) {
+    var found = raw.content.find(function(c) { return c.type === 'text'; });
+    text = found ? found.text : '';
+  } else if (raw && raw.completion) {
+    text = raw.completion;
+  } else {
+    text = JSON.stringify(raw);
   }
+  text = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+  var parsed = JSON.parse(text);
+  return Array.isArray(parsed) ? parsed : (parsed.routes || []);
+}
 
-  /* ── Build prompt ── */
-  function buildPrompt(origin, dest, transit, walking, driving, prefs) {
-    const now  = new Date();
-    const day  = now.toLocaleDateString('en', { weekday: 'long' });
-    const time = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
-    const prefStr = prefs.length
-      ? `User preferences: ${prefs.map(p => ({
-          walk: 'wants to walk some of the way',
-          scenic: 'wants the scenic or interesting route',
-          speed: 'wants to arrive as quickly as possible',
-          cheap: 'wants to minimise cost'
-        })[p] || p).join('; ')}.`
-      : 'No specific preferences.';
-
-    return `Journey: from "${origin}" to "${dest}".
-Time: ${day}, ${time}.
-
-${summarise(transit, 'transit')}
-${summarise(walking, 'walking')}
-${summarise(driving, 'driving/taxi')}
-
-${prefStr}
-
-Think creatively. Don't just give back the three Google modes — consider whether a hybrid makes sense (e.g. transit part-way then walk, or walk to avoid a bad interchange). Always return exactly 3 routes.`;
+/* ── Fallback routes ── */
+function fallbackRoutes(transit, walking, driving) {
+  var routes = [];
+  if (transit && transit.routes && transit.routes.length) {
+    var leg = transit.routes[0].legs[0];
+    routes.push({ title: 'By public transport', recommended: true,
+      duration: leg && leg.duration ? leg.duration.text : '—',
+      cost: transit.routes[0].fare ? '~' + transit.routes[0].fare.currency + transit.routes[0].fare.value : 'Transit fare',
+      legs: [{ icon: 'ti-bus', label: leg && leg.distance ? leg.distance.text : 'via transit' }],
+      flaneur_take: 'The city network — let it do the work.' });
   }
+  if (walking && walking.routes && walking.routes.length) {
+    var leg2 = walking.routes[0].legs[0];
+    routes.push({ title: 'On foot', recommended: !routes.length,
+      duration: leg2 && leg2.duration ? leg2.duration.text : '—',
+      cost: 'Free',
+      legs: [{ icon: 'ti-walk', label: 'Walk ' + (leg2 && leg2.distance ? leg2.distance.text : '') }],
+      flaneur_take: 'The most honest way to know a city.' });
+  }
+  if (driving && driving.routes && driving.routes.length) {
+    var leg3 = driving.routes[0].legs[0];
+    routes.push({ title: 'Taxi direct', recommended: !routes.length,
+      duration: leg3 && leg3.duration ? leg3.duration.text : '—',
+      cost: 'Taxi fare',
+      legs: [{ icon: 'ti-car', label: 'Drive ' + (leg3 && leg3.distance ? leg3.distance.text : '') }],
+      flaneur_take: 'Door to door. Worth it when time is the asset.' });
+  }
+  while (routes.length < 3) {
+    routes.push({ title: 'Alternative route', recommended: false, duration: '—', cost: '—', legs: [], flaneur_take: 'Another way to get there.' });
+  }
+  return routes;
+}
 
-  /* ── Fetch helpers with 25s timeout ── */
-  const fetchWithTimeout = (url, opts = {}, ms = 25000) => {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, { ...opts, signal: ctrl.signal })
-      .finally(() => clearTimeout(timer));
-  };
+/* ── Render cards ── */
+function renderCards(routes, origin, dest) {
+  document.getElementById('routeSubhead').textContent = origin + '  →  ' + dest;
+  var wrap = document.getElementById('routeCards');
+  wrap.innerHTML = '';
+  var sorted = routes.slice().sort(function(a, b) { return (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0); });
+  sorted.slice(0, 3).forEach(function(r) {
+    var card = document.createElement('div');
+    card.className = 'route-card card' + (r.recommended ? ' recommended' : '');
+    var legs = (r.legs || []).map(function(l) {
+      return '<span class="leg-pill"><span class="leg-icon">' + getIcon(l.icon) + '</span>' + escHtml(l.label || '') + '</span>';
+    }).join('');
+    card.innerHTML = '<span class="rec-badge">Recommended</span>' +
+      '<div class="route-top"><div class="route-title">' + escHtml(r.title || 'Route') + '</div>' +
+      '<div class="route-meta"><div class="route-duration">' + escHtml(r.duration || '—') + '</div>' +
+      '<div class="route-cost">' + escHtml(r.cost || '') + '</div></div></div>' +
+      (legs ? '<div class="route-legs">' + legs + '</div>' : '') +
+      '<div class="flaneur-take">“' + escHtml(r.flaneur_take || '') + '”</div>';
+    wrap.appendChild(card);
+  });
+}
 
-  const fetchDirections = (origin, dest, mode) =>
-    fetchWithTimeout(`${PROXY}/directions?origin=${encodeURIComponent(origin)}&destination
+/* ── Share URL ── */
+function updateURL(origin, dest, prefs) {
+  var params = new URLSearchParams({ from: origin, to: dest });
+  if (prefs.length) params.set('prefs', prefs.join(','));
+  var url = location.origin + location.pathname + '?' + params.toString();
+  history.replaceState(null, '', url);
+  document.getElementById('shareUrl').textContent = url;
+  document.getElementById('shareBar').classList.add('visible');
+}
+
+document.getElementById('shareCopy').addEventListener('click', function() {
+  var url = document.getElementById('shareUrl').textContent;
+  navigator.clipboard.writeText(url).then(function() {
+    var btn = document.getElementById('shareCopy');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+
+/* ── Main search ── */
+var searching = false;
+
+async function doSearch(origin, dest, prefs) {
+  if (searching) return;
+  searching = true;
+  var btn = document.getElementById('findBtn');
+  btn.disabled = true;
+  btn.textContent = 'Finding your route…';
+  document.getElementById('loadingWrap').classList.add('visible');
+  document.getElementById('errorBanner').classList.remove('visible');
+  document.getElementById('resultsWrap').classList.remove('visible');
+  document.getElementById('shareBar').classList.remove('visible');
+  setStep('step-dirs', 'active');
+  setStep('step-advice', '');
+  setStep('step-render', '');
+
+  try {
+    var results = await Promise.all([
+      fetchDirs(origin, dest, 'transit'),
+      fetchDirs(origin, dest, 'walking'),
+      fetchDirs(origin, dest, 'driving')
+    ]);
+    var transit = results[0], walking = results[1], driving = results[2];
+    if (!transit && !walking && !driving) throw new Error('No directions found — check your locations and try again.');
+
+    setStep('step-dirs', 'done');
+    setStep('step-advice', 'active');
+
+    var prompt = buildPrompt(origin, dest, transit, walking, driving, prefs);
+    var raw = await fetchAdvice(prompt);
+
+    setStep('step-advice', 'done');
+    setStep('step-render', 'active');
+
+    var routes;
+    try {
+      routes = parseRoutes(raw);
+      if (!routes || !routes.length) throw new Error('empty');
+    } catch (e) {
+      routes = fallbackRoutes(transit, walking, driving);
+    }
+
+    setStep('step-render', 'done');
+    document.getElementById('loadingWrap').classList.remove('visible');
+    renderCards(routes, origin, dest);
+    document.getElementById('resultsWrap').classList.add('visible');
+    updateURL(origin, dest, prefs);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingWrap').classList.remove('visible');
+    document.getElementById('errorText').textContent = err.name === 'AbortError' ? 'Request timed out — the server may be warming up, please try again.' : (err.message || 'Something went wrong.');
+    document.getElementById('errorBanner').classList.add('visible');
+  } finally {
+    searching = false;
+    btn.disabled = false;
+    btn.textContent = 'Find my route';
+  }
+}
+
+/* ── Find button ── */
+document.getElementById('findBtn').addEventListener('click', function() {
+  var origin = document.getElementById('origin').value.trim();
+  var dest = document.getElementById('destination').value.trim();
+  if (!origin) { document.getElementById('origin').focus(); return; }
+  if (!dest) { document.getElementById('destination').focus(); return; }
+  doSearch(origin, dest, activePrefs());
+});
+
+/* ── Enter key ── */
+['origin', 'destination'].forEach(function(id) {
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    var dropId = id === 'origin' ? 'ac-from' : 'ac-to';
+    if (e.key === 'Enter' && !document.getElementById(dropId).classList.contains('open')) {
+      var origin = document.getElementById('origin').value.trim();
+      var dest = document.getElementById('destination').value.trim();
+      if (origin && dest) doSearch(origin, dest, activePrefs());
+    }
+  });
+});
+
+/* ── Pre-fill from URL (no auto-search) ── */
+(function() {
+  var p = new URLSearchParams(location.search);
+  var from = p.get('from'), to = p.get('to');
+  var prefs = p.get('prefs') ? p.get('prefs').split(',').filter(Boolean) : [];
+  if (from) document.getElementById('origin').value = from;
+  if (to) document.getElementById('destination').value = to;
+  prefs.forEach(function(pref) {
+    var btn = document.querySelector('.pref-btn[data-pref="' + pref + '"]');
+    if (btn) btn.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
